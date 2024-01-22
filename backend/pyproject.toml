@@ -26,7 +26,10 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
+    "argon2",
     "click",
+    "flask",
+    "flask-sqlalchemy",
 ]
 
 [project.optional-dependencies]
