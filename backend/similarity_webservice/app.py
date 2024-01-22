@@ -1,5 +1,4 @@
-from similarity_webservice.database import db
-from typing import Optional
+from similarity_webservice.model import db, require_api_key
 
 import flask
 import logging
@@ -19,11 +18,13 @@ db.init_app(app)
 
 
 @app.route("/api/collection/create", methods=["POST"])
+@require_api_key
 def create_collection():
     raise NotImplementedError()
 
 
 @app.route("/api/collection/delete", methods=["DELETE"])
+@require_api_key
 def delete_collection():
     raise NotImplementedError()
 
@@ -34,11 +35,13 @@ def list_collections():
 
 
 @app.route("/api/collection/update", methods=["PUT"])
+@require_api_key
 def update_collection():
     raise NotImplementedError()
 
 
 @app.route("/api/collection/finetune", methods=["POST"])
+@require_api_key
 def finetune_collection():
     raise NotImplementedError()
 

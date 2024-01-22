@@ -1,14 +1,16 @@
-from dataclasses import dataclass
 from datetime import datetime
-from flask_sqlalchemy import SQLAlchemy
 
 import argon2
+import dataclasses
+import flask
+import flask_sqlalchemy
+import functools
 
 ph = argon2.PasswordHasher()
-db = SQLAlchemy()
+db = flask_sqlalchemy.SQLAlchemy()
 
 
-@dataclass
+@dataclasses.dataclass
 class Collection(db.Model):
     """A data collection used in similarity search."""
 
@@ -21,7 +23,18 @@ class Collection(db.Model):
         return f"<Collection {self.name}>"
 
 
-@dataclass
+def add_collection(name: str):
+    """Add a new collection to the database."""
+    coll = Collection(
+        name=name, last_modified=datetime.now(datetime.UTC), last_finetuned=None
+    )
+    db.session.add(coll)
+    db.session.commit()
+
+    return coll.id
+
+
+@dataclasses.dataclass
 class ApiKey(db.Model):
     """An API key that can be used to access the similarity webservice."""
 
@@ -29,6 +42,26 @@ class ApiKey(db.Model):
     name: str = db.Column(db.Text, nullable=False)
     key: str = db.Column(db.Text, nullable=False)
     created: datetime = db.Column(db.DateTime, nullable=False)
+
+
+def require_api_key(f):
+    @functools.wraps(f)
+    def decorated_function(*args, **kwargs):
+        api_key = flask.request.headers.get("API-Key")
+        if api_key is None:
+            return flask.jsonify({"message": "API key is missing"}), 403
+
+        # Verify API key (assuming it's hashed in the database)
+        try:
+            # Query the database for the API key
+            ApiKey.query.filter_by(hashed_key=ph.hash(api_key)).one()
+        # TODO: Check what is raised and restrict to exactly that
+        except:
+            return flask.jsonify({"message": "Invalid API key"}), 403
+
+        return f(*args, **kwargs)
+
+    return decorated_function
 
 
 def add_new_apikey(name: str, key: str) -> None:
