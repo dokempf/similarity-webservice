@@ -37,3 +37,21 @@ def add_new_apikey(name: str, key: str) -> None:
         ApiKey(name=name, key=ph.hash(key), created=datetime.datetime.now(datetime.UTC))
     )
     db.session.commit()
+
+
+def list_apikeys() -> list[ApiKey]:
+    """List all API keys."""
+
+    return ApiKey.query.all()
+
+
+def delete_apikey(id: int) -> None:
+    """Delete an API key from the database."""
+
+    key = ApiKey.query.filter_by(id=id)
+
+    if key is None:
+        raise ValueError(f"API key with id {id} does not exist.")
+
+    key.delete()
+    db.session.commit()

@@ -1,10 +1,9 @@
 import contextlib
 import click
-import datetime
 import flask
 import secrets
 
-from similarity_webservice.model import db, add_new_apikey
+from similarity_webservice.model import db, add_new_apikey, list_apikeys, delete_apikey
 
 
 @contextlib.contextmanager
@@ -51,7 +50,7 @@ def list():
     """List all API keys."""
 
     with faked_app():
-        keys = ApiKey.query.all()
+        keys = list_apikeys()
 
     click.echo(f"There are currently {len(keys)} active API keys:")
     for key in keys:
@@ -64,13 +63,11 @@ def delete(id):
     """Delete an API key."""
 
     with faked_app():
-        key = ApiKey.query.filter_by(id=id).first()
-        if key is None:
-            click.echo(f"Could not find API key with id {id}")
+        try:
+            delete_apikey(id)
+        except ValueError as e:
+            click.echo(e)
             return
-
-        db.session.delete(key)
-        db.session.commit()
 
     click.echo(f"Successfully Deleted API key with id {id}")
 
