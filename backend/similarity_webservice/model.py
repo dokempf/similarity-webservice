@@ -31,7 +31,44 @@ def add_collection(name: str):
     db.session.add(coll)
     db.session.commit()
 
-    return coll.id
+    return coll
+
+
+def delete_collection(id: int):
+    """Delete a collection from the database."""
+
+    coll = Collection.query.filter_by(id=id)
+
+    if coll is None:
+        raise ValueError(f"Collection with id {id} does not exist.")
+
+    coll.delete()
+    db.session.commit()
+
+
+def update_collection(id: str, content: list):
+    """Update the content of a given collection."""
+
+    coll = Collection.query.filter_by(id=id)
+
+    if coll is None:
+        raise ValueError(f"Collection with id {id} does not exist.")
+
+    coll.content = content
+    coll.last_modified = datetime.now(datetime.UTC)
+    db.session.commit()
+
+
+def list_collections():
+    """List all collections."""
+
+    return Collection.query.all()
+
+
+def collection_info(id):
+    """Get information about a collection."""
+
+    return Collection.query.filter_by(id=id).one()
 
 
 @dataclasses.dataclass
