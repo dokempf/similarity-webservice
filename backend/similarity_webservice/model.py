@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 
 import argon2
 import dataclasses
@@ -25,9 +25,7 @@ class Collection(db.Model):
 
 def add_collection(name: str):
     """Add a new collection to the database."""
-    coll = Collection(
-        name=name, last_modified=datetime.now(datetime.UTC), last_finetuned=None
-    )
+    coll = Collection(name=name, last_modified=datetime.now(UTC), last_finetuned=None)
     db.session.add(coll)
     db.session.commit()
 
@@ -55,7 +53,7 @@ def update_collection(id: str, content: list):
         raise ValueError(f"Collection with id {id} does not exist.")
 
     coll.content = content
-    coll.last_modified = datetime.now(datetime.UTC)
+    coll.last_modified = datetime.now(UTC)
     db.session.commit()
 
 
@@ -89,23 +87,23 @@ def require_api_key(f):
             return flask.jsonify({"message": "API key is missing"}), 403
 
         # Verify API key (assuming it's hashed in the database)
-        try:
-            # Query the database for the API key
-            ApiKey.query.filter_by(hashed_key=ph.hash(api_key)).one()
-        # TODO: Check what is raised and restrict to exactly that
-        except:
-            return flask.jsonify({"message": "Invalid API key"}), 403
+        for keyobj in ApiKey.query.all():
+            try:
+                if ph.verify(keyobj.key, api_key):
+                    return f(*args, **kwargs)
+            except argon2.exceptions.VerifyMismatchError:
+                pass
 
-        return f(*args, **kwargs)
+        # If we reach this point, the API key was not found
+        return flask.jsonify({"message": "Invalid API key"}), 403
 
     return decorated_function
 
 
 def add_new_apikey(name: str, key: str) -> None:
     """Add a new API key to the database."""
-    db.session.add(
-        ApiKey(name=name, key=ph.hash(key), created=datetime.datetime.now(datetime.UTC))
-    )
+
+    db.session.add(ApiKey(name=name, key=ph.hash(key), created=datetime.now(UTC)))
     db.session.commit()
 
 

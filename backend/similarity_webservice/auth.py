@@ -1,15 +1,19 @@
 import contextlib
 import click
 import flask
+import os
 import secrets
 
+from similarity_webservice.app import create_app
 from similarity_webservice.model import db, add_new_apikey, list_apikeys, delete_apikey
 
 
 @contextlib.contextmanager
 def faked_app():
     app = flask.Flask("similarity_webservice")
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///similarity_webservice.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+        "SQLALCHEMY_DATABASE_URI", "sqlite:///similarity_webservice.db"
+    )
     db.init_app(app)
 
     with app.app_context():
