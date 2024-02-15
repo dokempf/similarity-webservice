@@ -1,4 +1,4 @@
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 
 import argon2
 import dataclasses
@@ -25,7 +25,9 @@ class Collection(db.Model):
 
 def add_collection(name: str):
     """Add a new collection to the database."""
-    coll = Collection(name=name, last_modified=datetime.now(UTC), last_finetuned=None)
+    coll = Collection(
+        name=name, last_modified=datetime.now(timezone.UTC), last_finetuned=None
+    )
     db.session.add(coll)
     db.session.commit()
 
@@ -53,7 +55,7 @@ def update_collection(id: str, content: list):
         raise ValueError(f"Collection with id {id} does not exist.")
 
     coll.content = content
-    coll.last_modified = datetime.now(UTC)
+    coll.last_modified = datetime.now(timezone.UTC)
     db.session.commit()
 
 
@@ -103,7 +105,9 @@ def require_api_key(f):
 def add_new_apikey(name: str, key: str) -> None:
     """Add a new API key to the database."""
 
-    db.session.add(ApiKey(name=name, key=ph.hash(key), created=datetime.now(UTC)))
+    db.session.add(
+        ApiKey(name=name, key=ph.hash(key), created=datetime.now(timezone.UTC))
+    )
     db.session.commit()
 
 
