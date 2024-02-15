@@ -7,7 +7,7 @@ import pytest
 @pytest.fixture()
 def app(monkeypatch, tmp_path):
     monkeypatch.setenv(
-        "SQLALCHEMY_DATABASE_URI", f"sqlite://{str(tmp_path)}/similarity_webservice.db"
+        "SQLALCHEMY_DATABASE_URI", f"sqlite:///{str(tmp_path)}/similarity_webservice.db"
     )
 
     yield create_app()
