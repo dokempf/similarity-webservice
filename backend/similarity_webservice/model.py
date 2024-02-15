@@ -92,6 +92,12 @@ def require_api_key(f):
         for keyobj in ApiKey.query.all():
             try:
                 if ph.verify(keyobj.key, api_key):
+                    # argon2 specifies that we need to occasionally rehash the password
+                    if ph.check_needs_rehash(keyobj.key):
+                        keyobj.key = ph.hash(api_key)
+                        db.session.commit()
+
+                    # Proceed with the original route function
                     return f(*args, **kwargs)
             except argon2.exceptions.VerifyMismatchError:
                 pass
