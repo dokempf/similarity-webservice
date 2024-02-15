@@ -1,4 +1,4 @@
-from similarity_webservice.app import create_app, add_routes
+from similarity_webservice.app import create_app
 from similarity_webservice.model import add_new_apikey
 
 import pytest
@@ -10,9 +10,7 @@ def app(monkeypatch, tmp_path):
         "SQLALCHEMY_DATABASE_URI", f"sqlite://{str(tmp_path)}/similarity_webservice.db"
     )
 
-    app = create_app()
-    add_routes(app)
-    yield app
+    yield create_app()
 
 
 @pytest.fixture()
