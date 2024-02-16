@@ -32,3 +32,9 @@ def apikey(app):
     with app.app_context():
         add_new_apikey("test", key)
     return key
+
+
+@pytest.fixture()
+def app_context(app):
+    with app.app_context():
+        yield
