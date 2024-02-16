@@ -118,10 +118,6 @@ def list_apikeys() -> list[ApiKey]:
 def delete_apikey(id: int) -> None:
     """Delete an API key from the database."""
 
-    key = ApiKey.query.filter_by(id=id)
-
-    if key is None:
-        raise ValueError(f"API key with id {id} does not exist.")
-
-    key.delete()
+    key = ApiKey.query.where(ApiKey.id == id).one()
+    db.session.delete(key)
     db.session.commit()

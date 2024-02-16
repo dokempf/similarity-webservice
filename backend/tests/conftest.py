@@ -1,5 +1,6 @@
 from similarity_webservice.app import create_app
 from similarity_webservice.model import add_new_apikey, add_collection
+from click.testing import CliRunner
 
 import pytest
 
@@ -38,3 +39,8 @@ def apikey(app):
 def app_context(app):
     with app.app_context():
         yield
+
+
+@pytest.fixture()
+def runner(app_context):
+    return CliRunner()

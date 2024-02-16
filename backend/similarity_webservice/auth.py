@@ -3,6 +3,7 @@ import click
 import flask
 import os
 import secrets
+import sqlalchemy
 
 from similarity_webservice.app import create_app
 from similarity_webservice.model import db, add_new_apikey, list_apikeys, delete_apikey
@@ -69,8 +70,8 @@ def delete(id):
     with faked_app():
         try:
             delete_apikey(id)
-        except ValueError as e:
-            click.echo(e)
+        except sqlalchemy.exc.NoResultFound as e:
+            click.echo("API key not found")
             return
 
     click.echo(f"Successfully Deleted API key with id {id}")
