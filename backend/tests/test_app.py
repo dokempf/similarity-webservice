@@ -14,6 +14,11 @@ def test_info_collection(client):
         assert res.json["last_finetuned"] is None
 
 
+def test_info_collection_missing_id(client):
+    res = client.get("/api/collection/info")
+    assert res.status_code == 400
+
+
 def test_create_collection(client, apikey):
     res = client.post(
         "/api/collection/create",
@@ -28,6 +33,11 @@ def test_create_collection(client, apikey):
     assert tuple(res.json) == (1, 2, 3, 4)
 
 
+def test_create_collection_missing_name(client, apikey):
+    res = client.post("/api/collection/create", headers={"API-Key": apikey}, json={})
+    assert res.status_code == 400
+
+
 def test_delete_collection(client, apikey):
     res = client.delete(
         "/api/collection/delete", json={"id": 1}, headers={"API-Key": apikey}
@@ -37,6 +47,18 @@ def test_delete_collection(client, apikey):
     res = client.get("/api/collection/list")
     assert res.status_code == 200
     assert tuple(res.json) == (2, 3)
+
+
+def test_delete_collection_missing_id(client, apikey):
+    res = client.delete("/api/collection/delete", headers={"API-Key": apikey}, json={})
+    assert res.status_code == 400
+
+
+def test_delete_collection_invalid_id(client, apikey):
+    res = client.delete(
+        "/api/collection/delete", json={"id": 700}, headers={"API-Key": apikey}
+    )
+    assert res.status_code == 400
 
 
 def test_update_collection(client, apikey):
@@ -49,6 +71,30 @@ def test_update_collection(client, apikey):
 
     res = client.get("/api/collection/info?id=1")
     assert res.status_code == 200
+
+
+def test_update_collection_missing_data(client, apikey):
+    res = client.put("/api/collection/update", headers={"API-Key": apikey}, json={})
+    assert res.status_code == 400
+
+    res = client.put(
+        "/api/collection/update", headers={"API-Key": apikey}, json={"id": 1}
+    )
+    assert res.status_code == 400
+
+    res = client.put(
+        "/api/collection/update", headers={"API-Key": apikey}, json={"content": ["bla"]}
+    )
+    assert res.status_code == 400
+
+
+def test_update_collection_invalid_id(client, apikey):
+    res = client.put(
+        "/api/collection/update",
+        json={"id": 700, "content": ["new", "content"]},
+        headers={"API-Key": apikey},
+    )
+    assert res.status_code == 400
 
 
 # Currently not yet implemented

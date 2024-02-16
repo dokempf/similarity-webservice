@@ -12,6 +12,7 @@ from similarity_webservice.vision import finetune_model, similarity_search
 import flask
 import logging
 import os
+import sqlalchemy
 
 
 def create_app():
@@ -54,8 +55,11 @@ def create_app():
         if "id" not in data:
             return flask.jsonify(message="ID is missing"), 400
 
-        delete_collection(data["id"])
-        return flask.jsonify(message="Collection deleted")
+        try:
+            delete_collection(data["id"])
+            return flask.jsonify(message="Collection deleted")
+        except sqlalchemy.exc.NoResultFound:
+            return flask.jsonify(message="Collection not found"), 400
 
     @app.route("/api/collection/list", methods=["GET"])
     def route_list_collections():
@@ -63,7 +67,10 @@ def create_app():
 
     @app.route("/api/collection/info", methods=["GET"])
     def route_info_collection():
-        id = flask.request.args.get("id")
+        id = flask.request.args.get("id", None)
+        if id is None:
+            return flask.jsonify(message="ID is missing"), 400
+
         coll = collection_info(id)
         return flask.jsonify(coll)
 
@@ -77,8 +84,11 @@ def create_app():
         if "content" not in data:
             return flask.jsonify(message="Content is missing"), 400
 
-        update_collection(data["id"], data["content"])
-        return flask.jsonify(message="Collection updated")
+        try:
+            update_collection(data["id"], data["content"])
+            return flask.jsonify(message="Collection updated")
+        except sqlalchemy.exc.NoResultFound:
+            return flask.jsonify(message="Collection not found"), 400
 
     @app.route("/api/collection/finetune", methods=["POST"])
     @require_api_key
