@@ -26,7 +26,7 @@ class Collection(db.Model):
 def add_collection(name: str):
     """Add a new collection to the database."""
     coll = Collection(
-        name=name, last_modified=datetime.now(timezone.UTC), last_finetuned=None
+        name=name, last_modified=datetime.now(timezone.utc), last_finetuned=None
     )
     db.session.add(coll)
     db.session.commit()
@@ -55,7 +55,7 @@ def update_collection(id: str, content: list):
         raise ValueError(f"Collection with id {id} does not exist.")
 
     coll.content = content
-    coll.last_modified = datetime.now(timezone.UTC)
+    coll.last_modified = datetime.now(timezone.utc)
     db.session.commit()
 
 
@@ -92,6 +92,12 @@ def require_api_key(f):
         for keyobj in ApiKey.query.all():
             try:
                 if ph.verify(keyobj.key, api_key):
+                    # argon2 specifies that we need to occasionally rehash the password
+                    if ph.check_needs_rehash(keyobj.key):
+                        keyobj.key = ph.hash(api_key)
+                        db.session.commit()
+
+                    # Proceed with the original route function
                     return f(*args, **kwargs)
             except argon2.exceptions.VerifyMismatchError:
                 pass
@@ -106,7 +112,7 @@ def add_new_apikey(name: str, key: str) -> None:
     """Add a new API key to the database."""
 
     db.session.add(
-        ApiKey(name=name, key=ph.hash(key), created=datetime.now(timezone.UTC))
+        ApiKey(name=name, key=ph.hash(key), created=datetime.now(timezone.utc))
     )
     db.session.commit()
 
