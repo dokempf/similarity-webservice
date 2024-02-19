@@ -10,6 +10,7 @@ from similarity_webservice.model import (
 from similarity_webservice.vision import finetune_model, similarity_search
 
 import flask
+import flask_cors
 import logging
 import os
 import sqlalchemy
@@ -32,6 +33,9 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
         "SQLALCHEMY_DATABASE_URI", "sqlite:///similarity_webservice.db"
     )
+
+    # Enable CORS for all routes
+    flask_cors.CORS(app)
 
     # Initialize the database
     db.init_app(app)
@@ -63,7 +67,7 @@ def create_app():
 
     @app.route("/api/collection/list", methods=["GET"])
     def route_list_collections():
-        return flask.jsonify([coll.id for coll in list_collections()])
+        return flask.jsonify({"ids": [coll.id for coll in list_collections()]})
 
     @app.route("/api/collection/info", methods=["GET"])
     def route_info_collection():

@@ -1,7 +1,7 @@
 def test_list_collections(client):
     res = client.get("/api/collection/list")
     assert res.status_code == 200
-    assert tuple(res.json) == (1, 2, 3)
+    assert tuple(res.json["ids"]) == (1, 2, 3)
 
 
 def test_info_collection(client):
@@ -30,7 +30,7 @@ def test_create_collection(client, apikey):
 
     res = client.get("/api/collection/list")
     assert res.status_code == 200
-    assert tuple(res.json) == (1, 2, 3, 4)
+    assert tuple(res.json["ids"]) == (1, 2, 3, 4)
 
 
 def test_create_collection_missing_name(client, apikey):
@@ -46,7 +46,7 @@ def test_delete_collection(client, apikey):
 
     res = client.get("/api/collection/list")
     assert res.status_code == 200
-    assert tuple(res.json) == (2, 3)
+    assert tuple(res.json["ids"]) == (2, 3)
 
 
 def test_delete_collection_missing_id(client, apikey):

@@ -45,9 +45,9 @@
   {/each} -->
 </header>
 
-<main class="flex w-screen min-h-dvh bg-slate-200 dark:bg-slate-950">
+<main class="w-screen min-h-dvh bg-slate-200 dark:bg-slate-950">
   <!--overflow-auto: adds scroll bar only if overflow happens (under navbar), w-full: width to parent width, min-h-full: height to parent width (always), px-4: padding to left/right of screen, mx-auto: center horizontally, mt-16: margin to top (this will be "under" navbar)-->
-  <div class="overflow-auto w-full min-h-full px-4 mt-16">
+  <div class="flex flex-col overflow-auto w-full min-h-full px-4 mt-16 items-center">
     <Router {routes}/>
   </div>
 </main>
