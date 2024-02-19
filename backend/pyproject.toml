@@ -29,6 +29,7 @@ dependencies = [
     "argon2-cffi",
     "click",
     "flask",
+    "flask-cors",
     "flask-sqlalchemy",
 ]
 
