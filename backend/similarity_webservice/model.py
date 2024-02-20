@@ -1,13 +1,42 @@
 from datetime import datetime, timezone
 
 import argon2
+import csv
 import dataclasses
 import flask
 import flask_sqlalchemy
 import functools
+import io
 
 ph = argon2.PasswordHasher()
 db = flask_sqlalchemy.SQLAlchemy()
+
+
+@dataclasses.dataclass
+class Images(db.Model):
+    """A data collection used in similarity search."""
+
+    id: int = db.Column(db.Integer, primary_key=True)
+    collection: int = db.Column(db.Integer)
+    content: list = db.Column(db.JSON, nullable=False)
+
+
+def images_as_csv(id: int):
+    """Return the content of a collection as a CSV file."""
+
+    images = Images.query.where(Images.collection == id).one()
+
+    # Write the content into a string buffer
+    with io.StringIO() as output:
+        writer = csv.writer(output)
+        writer.writerows(images.content)
+
+        # Make this a binary buffer for flask
+        mem = io.BytesIO()
+        mem.write(output.getvalue().encode("utf-8"))
+        mem.seek(0)
+
+        return mem
 
 
 @dataclasses.dataclass
@@ -19,16 +48,20 @@ class Collection(db.Model):
     last_modified: datetime = db.Column(db.DateTime, nullable=False)
     last_finetuned: datetime = db.Column(db.DateTime)
 
-    def __repr__(self):
-        return f"<Collection {self.name}>"
-
 
 def add_collection(name: str):
     """Add a new collection to the database."""
+
+    # Create the collection in the Collection table
     coll = Collection(
         name=name, last_modified=datetime.now(timezone.utc), last_finetuned=None
     )
     db.session.add(coll)
+    db.session.commit()
+
+    # Add a corresponding entry in the Images table
+    images = Images(collection=coll.id, content=[])
+    db.session.add(images)
     db.session.commit()
 
     return coll
@@ -42,12 +75,29 @@ def delete_collection(id: int):
     db.session.commit()
 
 
-def update_collection(id: str, content: list):
+def update_collection_content(id: str, content: str):
     """Update the content of a given collection."""
 
+    content = [
+        [token.strip() for token in line.split(",")]
+        for line in content.strip().split("\n")
+    ]
+
+    # Update the content of the collection
+    images = Images.query.where(Images.collection == id).one()
+    images.content = content
+
+    # Update the last modified timestamp
     coll = Collection.query.where(Collection.id == id).one()
-    coll.content = content
     coll.last_modified = datetime.now(timezone.utc)
+    db.session.commit()
+
+
+def update_collection_name(id: str, name: str):
+    """Update the name of a given collection."""
+
+    coll = Collection.query.where(Collection.id == id).one()
+    coll.name = name
     db.session.commit()
 
 
