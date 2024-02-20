@@ -1,15 +1,6 @@
 <script lang="ts">
   import { Button, Dropzone, Gallery, Label, Select, Spinner } from "flowbite-svelte";
-  import { get } from "../utils/requests";
-
-  async function getCollections() {
-    let collections = await get("/collection/list");
-    let collection_options = [];
-    for (let c in collections["ids"]) {
-      collection_options.push({value: c.toString(), name: "Collection " + c});
-    }
-    return collection_options;
-  }
+  import { getCollections } from "../utils/backend";
 
   function dropHandle(event) {
     event.preventDefault();
