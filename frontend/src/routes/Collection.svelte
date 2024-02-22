@@ -73,12 +73,6 @@
       </button>
     </Input>
   </div>
-  <div class="w-full pt-4">
-    Add new (empty) data source:
-    <Label>Dataset name:</Label>
-    <Input type="text" class="w-full" bind:value={createname} id="datasetname" required />
-    <Button class="w-full" color="blue" on:click={createDatasetTrigger}>Add data source</Button>
-  </div>
   <div class="pt-4">
     <Label>Existing Data Sources:</Label>
     <div class="h-full bg-slate-50">
@@ -185,5 +179,11 @@
         {/await}
       {/key}
     </div>
+  </div>
+  <div class="w-full pt-4">
+    Add new (empty) data source:
+    <Label>Dataset name:</Label>
+    <Input type="text" class="w-full" bind:value={createname} id="datasetname" required />
+    <Button class="w-full" color="blue" on:click={createDatasetTrigger}>Add data source</Button>
   </div>
 </div>
