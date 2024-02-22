@@ -39,3 +39,7 @@ export async function easyDBImport (collectionId: string, easydbURL: string, eas
 export async function uploadCSVFile (collectionId: string, file: File, key: string): Promise<void> {
   await postFile('/collection/' + collectionId + '/updatecontent', key, file, 'text/csv')
 }
+
+export async function verifyAPIKey (key: string): Promise<object> {
+  return await post('/verify', key, {})
+}
