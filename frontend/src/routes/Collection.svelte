@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Button, Fileupload, Helper, Input, Label, Modal, P } from "flowbite-svelte";
   // For additional matching icons, see https://flowbite-svelte-icons.vercel.app/outline
-  import { DatabaseOutline, DownloadOutline, EditOutline, FileCsvOutline, FileImportOutline, MagicWandOutline, TrashBinOutline, UploadOutline } from "flowbite-svelte-icons";
-  import { changeDatasetName, createDataset, deleteDataset, easyDBImport, getCollections, getCollection, finetuneModel, uploadCSVFile } from "../utils/backend";
+  import { DatabaseOutline, DownloadOutline, EditOutline, EyeOutline, EyeSlashOutline, FileCsvOutline, FileImportOutline, MagicWandOutline, TrashBinOutline, UploadOutline } from "flowbite-svelte-icons";
+  import { changeDatasetName, createDataset, deleteDataset, easyDBImport, getCollections, getCollection, finetuneModel, uploadCSVFile, verifyAPIKey } from "../utils/backend";
 
   // State for a reload trigger of the collection list
   let reload = false;
@@ -23,6 +23,8 @@
 
   // The state for the API key
   let apikey = "";
+  let apikey_visible = false;
+  let apikey_verified = false;
 
   async function deleteDatasetTrigger(id) {
     delete_modal[id] = false
@@ -49,13 +51,27 @@
       reload = !reload;
     }
   }
+
+  async function verifyAPIKeyTrigger() {
+    const response = await verifyAPIKey(apikey)
+    apikey_verified = response.message === "API key is valid"
+    console.log(apikey_verified)
+  }
 </script>
 
 <div class="w-full h-full pt-8">
   <P>Explanatory Text...</P>
   <div class="pt-4">
-    <Label>API Key:</Label>
-    <Input type="text" class="w-full" id="apikey" bind:value={apikey} />
+    <Label color={apikey_verified ? "green" :  "red"}>API Key:</Label>
+    <Input color={apikey_verified ? "green" :  "red"} on:blur={verifyAPIKeyTrigger} type={apikey_visible ? "text" : "password"} class="w-full" id="apikey" bind:value={apikey}>
+      <button type="button" slot="right" on:click={() => (apikey_visible = !apikey_visible)} tabindex=-1>
+        {#if apikey_visible}
+          <EyeSlashOutline class="w-6 h-6" />
+        {:else}
+          <EyeOutline class="w-6 h-6" />
+        {/if}
+      </button>
+    </Input>
   </div>
   <div class="w-full pt-4">
     Add new (empty) data source:

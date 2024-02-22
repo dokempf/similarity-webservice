@@ -42,6 +42,11 @@ def create_app():
     # Initialize the database
     db.init_app(app)
 
+    @app.route("/api/verify", methods=["POST"])
+    @require_api_key
+    def route_verify():
+        return flask.jsonify(message="API key is valid")
+
     @app.route("/api/collection/create", methods=["POST"])
     @require_api_key
     def route_create_collection():
