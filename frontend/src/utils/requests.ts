@@ -1,17 +1,41 @@
-export async function get (route: string, args: object): Promise<object> {
-  const apiURL = 'http://localhost:5000/api'
-  let returnObj: object
-  try {
-    const response: object = await fetch(apiURL + route + '?' + new URLSearchParams(args).toString(), { method: 'GET' })
-    const responseContent: object = await response.json()
-    returnObj = Object.assign(response, responseContent)
-  } catch (error: unknown) {
-    returnObj = {
-      ok: false,
-      status: 404,
-      msg: error.message
-    }
-  }
+const apiURL = 'http://localhost:5000/api'
 
-  return returnObj
+export async function get (route: string, args: object): Promise<object> {
+  const response: object = await fetch(
+    apiURL + route + '?' + new URLSearchParams(args).toString(),
+    {
+      method: 'GET'
+    }
+  )
+  return response.json()
+}
+
+export async function post (route: string, key: string, body: object = {}): Promise<object> {
+  const response: object = await fetch(
+    apiURL + route,
+    {
+      method: 'POST',
+      headers: {
+        'API-Key': key,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    }
+  )
+  return response.json()
+}
+
+export async function postFile (route: string, key: string, file: File, mimetype: string): Promise<object> {
+  const response: object = await fetch(
+    apiURL + route,
+    {
+      method: 'POST',
+      headers: {
+        'API-Key': key,
+        'Content-Type': mimetype
+      },
+      body: file
+    }
+  )
+  return response.json()
 }
