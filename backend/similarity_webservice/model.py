@@ -128,7 +128,10 @@ def require_api_key(f):
     def decorated_function(*args, **kwargs):
         api_key = flask.request.headers.get("API-Key")
         if api_key is None:
-            return flask.jsonify({"message": "API key is missing"}), 403
+            return (
+                flask.jsonify(message="API key is missing", message_type="error"),
+                403,
+            )
 
         # Verify API key (assuming it's hashed in the database)
         for keyobj in ApiKey.query.all():
@@ -145,7 +148,7 @@ def require_api_key(f):
                 pass
 
         # If we reach this point, the API key was not found
-        return flask.jsonify({"message": "Invalid API key"}), 403
+        return flask.jsonify(message="Invalid API key", message_type="error"), 403
 
     return decorated_function
 

@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Navbar, NavBrand, NavHamburger, NavUl, NavLi } from "flowbite-svelte";
-  import { GithubSolid } from "flowbite-svelte-icons";
+  import { Alert, Navbar, NavBrand, NavHamburger, NavUl, NavLi } from "flowbite-svelte";
+  import { GithubSolid, InfoCircleSolid } from "flowbite-svelte-icons";
+  import { alerts } from "./utils/alerts";
 
   import Router from "svelte-spa-router";
 
@@ -37,12 +38,12 @@
     </NavUl>
   </Navbar>
 
-  <!-- {#each $alerts as alert}
+  {#each $alerts as alert}
     <Alert color={alert.color} dismissable class="m-2">
       <InfoCircleSolid slot="icon" class="w-4 h-4" />
       {alert.msg}
     </Alert>
-  {/each} -->
+  {/each}
 </header>
 
 <main class="w-screen min-h-dvh bg-slate-200 dark:bg-slate-950">

@@ -45,7 +45,7 @@ def create_app():
     @app.route("/api/verify", methods=["POST"])
     @require_api_key
     def route_verify():
-        return flask.jsonify(message="API key is valid")
+        return flask.jsonify(message="API key is valid", message_type="push")
 
     @app.route("/api/collection/create", methods=["POST"])
     @require_api_key
@@ -53,19 +53,27 @@ def create_app():
         data = flask.request.json
 
         if "name" not in data:
-            return flask.jsonify(message="Name is missing"), 400
+            return flask.jsonify(message="Name is missing", message_type="error"), 400
 
         coll = add_collection(data["name"])
-        return flask.jsonify(message="Collection created", id=coll.id), 200
+        return (
+            flask.jsonify(
+                message="Collection created", message_type="push", id=coll.id
+            ),
+            200,
+        )
 
     @app.route("/api/collection/<id>/delete", methods=["POST"])
     @require_api_key
     def route_delete_collection(id):
         try:
             delete_collection(id)
-            return flask.jsonify(message="Collection deleted")
+            return flask.jsonify(message="Collection deleted", message_type="push")
         except sqlalchemy.exc.NoResultFound:
-            return flask.jsonify(message="Collection not found"), 400
+            return (
+                flask.jsonify(message="Collection not found", message_type="error"),
+                400,
+            )
 
     @app.route("/api/collection/list", methods=["GET"])
     def route_list_collections():
@@ -81,7 +89,12 @@ def create_app():
                 mimetype="text/csv",
             )
         except sqlalchemy.exc.NoResultFound:
-            return flask.jsonify(message=f"Collection with id={id} not found"), 400
+            return (
+                flask.jsonify(
+                    message=f"Collection with id={id} not found", message_type="error"
+                ),
+                400,
+            )
 
     @app.route("/api/collection/<id>/info", methods=["GET"])
     def route_info_collection(id):
@@ -89,7 +102,12 @@ def create_app():
             coll = collection_info(id)
             return flask.jsonify(coll)
         except sqlalchemy.exc.NoResultFound:
-            return flask.jsonify(message=f"Collection with id={id} not found"), 400
+            return (
+                flask.jsonify(
+                    message=f"Collection with id={id} not found", message_type="error"
+                ),
+                400,
+            )
 
     @app.route("/api/collection/<id>/updatecontent", methods=["POST"])
     @require_api_key
@@ -97,9 +115,14 @@ def create_app():
         try:
             update_collection_content(id, flask.request.data.decode("utf-8"))
         except sqlalchemy.exc.NoResultFound:
-            return flask.jsonify(message=f"Collection with id={id} not found"), 400
+            return (
+                flask.jsonify(
+                    message=f"Collection with id={id} not found", message_type="error"
+                ),
+                400,
+            )
 
-        return flask.jsonify(message="Collection updated")
+        return flask.jsonify(message="Collection updated", message_type="push")
 
     @app.route("/api/collection/<id>/updatename", methods=["POST"])
     @require_api_key
@@ -110,30 +133,42 @@ def create_app():
             if "name" in data:
                 update_collection_name(id, data["name"])
         except sqlalchemy.exc.NoResultFound:
-            return flask.jsonify(message=f"Collection with id={id} not found"), 400
+            return (
+                flask.jsonify(
+                    message=f"Collection with id={id} not found", message_type="error"
+                ),
+                400,
+            )
 
-        return flask.jsonify(message="Collection updated")
+        return flask.jsonify(message="Collection updated", message_type="push")
 
     @app.route("/api/collection/<id>/finetune", methods=["POST"])
     @require_api_key
     def route_finetune_collection(id):
         try:
             finetune_model(id)
-            return flask.jsonify(message="Model finetuning started")
+            return flask.jsonify(
+                message="Model finetuning started", message_type="push"
+            )
         except sqlalchemy.exc.NoResultFound:
-            return flask.jsonify(message=f"Collection with id={id} not found"), 400
+            return (
+                flask.jsonify(
+                    message=f"Collection with id={id} not found", message_type="error"
+                ),
+                400,
+            )
 
     @app.route("/api/search", methods=["GET"])
     def route_search():
         # Extract the image from the request
         if "image" not in flask.request.files:
-            return flask.jsonify(message="Image is missing"), 400
+            return flask.jsonify(message="Image is missing", message_type="error"), 400
         image = flask.request.files["image"]
 
         # Extract relevant data from the request
         data = flask.request.json
         if "id" not in data:
-            return flask.jsonify(message="ID is missing"), 400
+            return flask.jsonify(message="ID is missing", message_type="error"), 400
         id = flask.request.json["id"]
 
         return flask.jsonify(similarity_search(id, image))
