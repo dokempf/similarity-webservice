@@ -104,7 +104,7 @@
                     <!-- The buttons shown for each dataset -->
                     <Button color="blue" on:click={() => (upload_modal[id] = true)}><FileCsvOutline /><UploadOutline />Upload Data</Button>
                     <Button color="blue" on:click={() => (easydb_modal[id] = true)}><DatabaseOutline /><FileImportOutline />Import from EasyDB</Button>
-                    <form action="http://localhost:5000/api/collection/{id}/csvfile" class="inline">
+                    <form action="{import.meta.env.VITE_BACKEND_BASE_URL}/api/collection/{id}/csvfile" class="inline">
                       <Button color="blue" type="submit"><FileCsvOutline /><DownloadOutline />Download Data</Button>
                     </form>
                     <Button color="blue" on:click={() => (delete_modal[id] = true)}><TrashBinOutline />Delete Dataset</Button>
