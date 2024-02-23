@@ -29,6 +29,11 @@ def test_list_keys(runner):
     assert result.exit_code == 0
     assert "There are currently 0 active API keys" in result.output
 
+    runner.invoke(create, ["--name", "testkey"])
+    result = runner.invoke(list)
+    assert result.exit_code == 0
+    assert "#0001" in result.output
+
 
 def test_create_key(runner):
     result = runner.invoke(create, ["--name", "testkey"])
