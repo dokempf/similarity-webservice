@@ -1,6 +1,6 @@
 import { alerts } from './alerts'
 
-const apiURL = 'http://localhost:5000/api'
+const apiURL = import.meta.env.VITE_BACKEND_BASE_URL
 
 function triggerAlert (response: any): void {
   if ('message_type' in response) {

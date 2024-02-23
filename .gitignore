@@ -1,3 +1,5 @@
+docker_volume
+
 # Ignore setuptools_scm generated version file
 similarity_webservice/_version.py
 
