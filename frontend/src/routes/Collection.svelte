@@ -1,25 +1,24 @@
 <script lang="ts">
-  import { Button, Fileupload, Helper, Input, Label, Modal, P } from "flowbite-svelte";
+  import { Button, Fileupload, Helper, Input, Label, Modal, P, Toggle } from "flowbite-svelte";
   // For additional matching icons, see https://flowbite-svelte-icons.vercel.app/outline
   import { DatabaseOutline, DownloadOutline, EditOutline, EyeOutline, EyeSlashOutline, FileCsvOutline, FileImportOutline, MagicWandOutline, TrashBinOutline, UploadOutline } from "flowbite-svelte-icons";
-  import { changeDatasetName, createDataset, deleteDataset, easyDBImport, getCollections, getCollection, finetuneModel, uploadCSVFile, verifyAPIKey } from "../utils/backend";
+  import { changeDatasetName, createDataset, deleteDataset, getCollections, getCollection, finetuneModel, uploadCSVFile, updateHeidicon, verifyAPIKey } from "../utils/backend";
 
   // State for a reload trigger of the collection list
   let reload = false;
 
   // The state for modals on this page
   let delete_modal = {};
-  let easydb_modal = {};
   let editname_modal = {};
   let finetune_modal = {};
   let upload_modal = {};
 
   // The state for form elements on the modals on this page
-  let easydb_url = {};
-  let easydb_tag = {};
   let newname = {};
   let csvfile = {};
   let createname = "";
+  let heidicon = false;
+  let heidicon_tag = "";
 
   // The state for the API key
   let apikey = "";
@@ -45,8 +44,11 @@
   }
 
   async function createDatasetTrigger() {
+    if (!heidicon) {
+      heidicon_tag = ""
+    }
     if (createname !== "") {
-      await createDataset(createname, apikey)
+      await createDataset(createname, heidicon_tag, apikey)
       createname = ""
       reload = !reload;
     }
@@ -102,8 +104,12 @@
                   </div>
                   <div>
                     <!-- The buttons shown for each dataset -->
-                    <Button color="blue" on:click={() => (upload_modal[id] = true)}><FileCsvOutline /><UploadOutline />Upload Data</Button>
-                    <Button color="blue" on:click={() => (easydb_modal[id] = true)}><DatabaseOutline /><FileImportOutline />Import from EasyDB</Button>
+                    {#if details.heidicon_tag === null }
+                      <Button color="blue" on:click={() => (upload_modal[id] = true)}><FileCsvOutline /><UploadOutline />Upload Data</Button>
+                    {/if}
+                    {#if details.heidicon_tag !== null}
+                      <Button color="blue" on:click={() => (updateHeidicon(id, apikey))}><DatabaseOutline /><FileImportOutline />Synchronize with HeidIcon</Button>
+                    {/if}
                     <form action="{import.meta.env.VITE_BACKEND_BASE_URL}/api/collection/{id}/csvfile" class="inline">
                       <Button color="blue" type="submit"><FileCsvOutline /><DownloadOutline />Download Data</Button>
                     </form>
@@ -125,22 +131,6 @@
                       </div>
                       <svelte:fragment slot="footer">
                         <Button color="blue" on:click={() => uploadCSVFileTrigger(id)}>Upload file</Button>
-                      </svelte:fragment>
-                    </Modal>
-                    <Modal title="Import from EasyDB" bind:open={easydb_modal[id]} outsideclose autoclose>
-                      <P>
-                        We use the concept of EasyDB tags in order to select the subset of data that we want to
-                        use for similarity search. In order to add tags, you need to be an administator of the
-                        EasyDB instance.
-                      </P>
-                      <div class="p-4">
-                        <Label>EasyDB Instance URL:</Label>
-                        <Input type="text" class="w-full" bind:value={easydb_url[id]} id="easydb_url" placeholder="https://heidicon.ub.uni-heidelberg.de/" required />
-                        <Label>EasyDB Tag</Label>
-                        <Input type="text" class="w-full" bind:value={easydb_tag[id]} id="easydb_tag" required />
-                      </div>
-                      <svelte:fragment slot="footer">
-                        <Button color="blue" on:click={() => (easyDBImport(id, easydb_url[id], easydb_tag[id]))}>Import data</Button>
                       </svelte:fragment>
                     </Modal>
                     <Modal title="Edit Dataset Name" bind:open={editname_modal[id]} outsideclose autoclose>
@@ -184,6 +174,13 @@
     Add new (empty) data source:
     <Label>Dataset name:</Label>
     <Input type="text" class="w-full" bind:value={createname} id="datasetname" required />
+    <Toggle bind:checked={heidicon}>This dataset is managed on HeidICON</Toggle>
+    {#if heidicon}
+      <Label>
+        The images in HeidIcon are tagged with the following tag:
+        <Input type="text" class="w-full" bind:value={heidicon_tag} id="heidicon_tag" />
+      </Label>
+    {/if}
     <Button class="w-full" color="blue" on:click={createDatasetTrigger}>Add data source</Button>
   </div>
 </div>
