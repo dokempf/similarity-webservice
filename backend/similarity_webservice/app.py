@@ -55,7 +55,12 @@ def create_app():
         if "name" not in data:
             return flask.jsonify(message="Name is missing", message_type="error"), 400
 
-        coll = add_collection(data["name"])
+        # The frontend might send the empty string instead of null
+        heidicon_tag = data.get("heidicon_tag", "")
+        if heidicon_tag == "":
+            heidicon_tag = None
+
+        coll = add_collection(data["name"], heidicon_tag=heidicon_tag)
         return (
             flask.jsonify(
                 message="Collection created", message_type="push", id=coll.id
