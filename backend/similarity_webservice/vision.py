@@ -2,7 +2,7 @@ import torch
 from PIL import Image
 import lavis
 from lavis.models import load_model_and_preprocess
-from model import Images, Collection
+from similarity_webservice.model import Images, Collection
 import urllib.request
 import pandas as pd
 import numpy as np
