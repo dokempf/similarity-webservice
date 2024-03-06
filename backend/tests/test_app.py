@@ -1,3 +1,8 @@
+def test_verify(client, apikey):
+    res = client.post("/api/verify", headers={"API-Key": apikey})
+    assert res.status_code == 200
+
+
 def test_list_collections(client):
     res = client.get("/api/collection/list")
     assert res.status_code == 200
@@ -52,6 +57,28 @@ def test_delete_collection_invalid_id(client, apikey):
     assert res.status_code == 400
 
 
+def test_update_name_collection(client, apikey):
+    res = client.post(
+        "/api/collection/1/updatename",
+        json={"name": "newname"},
+        headers={"API-Key": apikey},
+    )
+    assert res.status_code == 200
+
+    res = client.get("/api/collection/1/info")
+    assert res.status_code == 200
+    assert res.json["name"] == "newname"
+
+
+def test_update_name_collection_invalid_id(client, apikey):
+    res = client.post(
+        "/api/collection/700/updatename",
+        json={"name": "newname"},
+        headers={"API-Key": apikey},
+    )
+    assert res.status_code == 400
+
+
 def test_update_collection(client, apikey):
     res = client.post(
         "/api/collection/1/updatecontent",
@@ -70,6 +97,18 @@ def test_update_collection_invalid_id(client, apikey):
         json={"content": ["new", "content"]},
         headers={"API-Key": apikey},
     )
+    assert res.status_code == 400
+
+
+def test_csvfile_download(client):
+    res = client.get("/api/collection/1/csvfile")
+    assert res.status_code == 200
+    assert res.headers["Content-Type"] == "text/csv; charset=utf-8"
+    assert res.headers["Content-Disposition"] == "attachment; filename=collection1.csv"
+
+
+def test_csvfile_download_invalid_id(client):
+    res = client.get("/api/collection/5/csvfile")
     assert res.status_code == 400
 
 

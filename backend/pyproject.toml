@@ -31,9 +31,7 @@ dependencies = [
     "flask",
     "flask-cors",
     "flask-sqlalchemy",
-    "Pillow",
-    "torch<2.1.0",
-    "salesforce-lavis",
+    "requests",
 ]
 
 [project.optional-dependencies]

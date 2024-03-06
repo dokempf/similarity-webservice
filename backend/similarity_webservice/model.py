@@ -1,4 +1,7 @@
+from similarity_webservice.heidicon import extract_heidicon_content
+
 from datetime import datetime, timezone
+from typing import Optional
 
 import argon2
 import csv
@@ -47,20 +50,29 @@ class Collection(db.Model):
     name: str = db.Column(db.Text, nullable=False)
     last_modified: datetime = db.Column(db.DateTime, nullable=False)
     last_finetuned: datetime = db.Column(db.DateTime)
+    heidicon_tag: str = db.Column(db.Text, nullable=True)
 
 
-def add_collection(name: str):
+def add_collection(name: str, heidicon_tag: Optional[str] = None):
     """Add a new collection to the database."""
 
     # Create the collection in the Collection table
     coll = Collection(
-        name=name, last_modified=datetime.now(timezone.utc), last_finetuned=None
+        name=name,
+        last_modified=datetime.now(timezone.utc),
+        last_finetuned=None,
+        heidicon_tag=heidicon_tag,
     )
     db.session.add(coll)
     db.session.commit()
 
+    # If a HeidICON tag was given, extract the content from HeidICON
+    content = []
+    if heidicon_tag is not None:
+        content = extract_heidicon_content(heidicon_tag)
+
     # Add a corresponding entry in the Images table
-    images = Images(collection=coll.id, content=[])
+    images = Images(collection=coll.id, content=content)
     db.session.add(images)
     db.session.commit()
 
@@ -78,17 +90,22 @@ def delete_collection(id: int):
 def update_collection_content(id: str, content: str):
     """Update the content of a given collection."""
 
-    content = [
-        [token.strip() for token in line.split(",")]
-        for line in content.strip().split("\n")
-    ]
+    # If this is based on HeidICON, extract the content
+    coll = Collection.query.where(Collection.id == id).one()
+    if coll.heidicon_tag is not None:
+        content = extract_heidicon_content(coll.heidicon_tag)
+    else:
+        # Normalize the given string input
+        content = [
+            [token.strip() for token in line.split(",")]
+            for line in content.strip().split("\n")
+        ]
 
     # Update the content of the collection
     images = Images.query.where(Images.collection == id).one()
     images.content = content
 
     # Update the last modified timestamp
-    coll = Collection.query.where(Collection.id == id).one()
     coll.last_modified = datetime.now(timezone.utc)
     db.session.commit()
 

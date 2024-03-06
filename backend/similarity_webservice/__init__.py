@@ -1,0 +1,1 @@
+from similarity_webservice.app import create_app

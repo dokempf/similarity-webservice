@@ -1,0 +1,12 @@
+services:
+  backend:
+    build: ./backend
+    volumes:
+      - ${SIMILARITY_WEBSERVICE_DATA:-./docker_volume}:/data
+    environment:
+      - SQLALCHEMY_DATABASE_URI=sqlite:////data/similarity.db
+
+  frontend:
+    build: ./frontend
+    ports:
+      - 80:80
