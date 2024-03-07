@@ -47,7 +47,7 @@ def finetune_model(id: str):
             for raw_image in raw_images
         ]
         features_image_stacked = extract_features(preprocessed_image, model)
-        
+
         # Convert features to DataFrame and save to Parquet
         features_df = pd.DataFrame(features_image_stacked.cpu().numpy())
         parquet_file = io.BytesIO()
@@ -57,7 +57,7 @@ def finetune_model(id: str):
         # Update the database with the extracted features
         images.parquet_data = parquet_file.read()
         images.save()
-    
+
 
 def similarity_search(id: str, images: list, num_limit=5, precision_thr=0.0):
     """Search for similar images in a given collection."""
@@ -71,9 +71,8 @@ def similarity_search(id: str, images: list, num_limit=5, precision_thr=0.0):
     model.to(device)
     # preprocess upload images and calculate features
     preprocessed_image = [
-        vis_processors["eval"](Image.open(img).convert("RGB"))
-        .unsqueeze(0)
-        .to(device) for img in images
+        vis_processors["eval"](Image.open(img).convert("RGB")).unsqueeze(0).to(device)
+        for img in images
     ]
     multi_features_stacked = extract_features(preprocessed_image, model)
 
@@ -81,7 +80,7 @@ def similarity_search(id: str, images: list, num_limit=5, precision_thr=0.0):
     images_data = Images.query.filter(Images.collection == id).one()
     feature_df = pd.read_parquet(io.BytesIO(images_data.parquet_data))
     features_tensor = torch.tensor(feature_df.values).to(device)
-    feature_df['id'] = images_data.id
+    feature_df["id"] = images_data.id
 
     # calculate similarity scores, filter and sort them
     similarity_scores = torch.matmul(
@@ -90,10 +89,12 @@ def similarity_search(id: str, images: list, num_limit=5, precision_thr=0.0):
 
     similar_image_indices = torch.nonzero(
         similarity_scores >= precision_thr, as_tuple=False
-        ).squeeze()
-    
-    sorted_indices = sorted(similar_image_indices.tolist(), key=lambda x: similarity_scores[x], reverse=True)
+    ).squeeze()
+
+    sorted_indices = sorted(
+        similar_image_indices.tolist(), key=lambda x: similarity_scores[x], reverse=True
+    )
 
     # Get the IDs of the most similar images
-    most_similar_image_ids = [feature_df.iloc[i]['id'] for i in sorted_indices]
+    most_similar_image_ids = [feature_df.iloc[i]["id"] for i in sorted_indices]
     return most_similar_image_ids[:num_limit]
