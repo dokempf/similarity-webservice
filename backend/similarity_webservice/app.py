@@ -174,10 +174,9 @@ def create_app():
         data = flask.request.json
         if "id" not in data:
             return flask.jsonify(message="ID is missing", message_type="error"), 400
-        id = flask.request.json["id"]
+        id = data["id"]
 
-        return flask.jsonify(similarity_search(id, image))
-
+        return flask.jsonify(similarity_search(id, [image]))
     with app.app_context():
         db.create_all()
 
