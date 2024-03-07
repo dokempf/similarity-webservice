@@ -22,7 +22,7 @@ class Images(db.Model):
     id: int = db.Column(db.Integer, primary_key=True)
     collection: int = db.Column(db.Integer)
     content: list = db.Column(db.JSON, nullable=False)
-
+    parquet_data: bytes = db.Column(db.LargeBinary, nullable=True)
 
 def images_as_csv(id: int):
     """Return the content of a collection as a CSV file."""
