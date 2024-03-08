@@ -1,6 +1,7 @@
 import torch
 from PIL import Image
 import lavis
+from datetime import datetime, timezone
 from lavis.models import load_model_and_preprocess
 from similarity_webservice.model import Images, Collection
 import urllib.request
@@ -41,7 +42,7 @@ def finetune_model(id: str):
 
     # For each image of collection we check if images do not have a parquet file, extract features for particular image and save them
     if images.parquet_data is None:
-        raw_images = [Image.open(image).convert("RGB") for image in images.content]
+        raw_images = [Image.open(urllib.request.urlopen(image[0])).convert("RGB") for image in images.content]
         preprocessed_image = [
             vis_processors["eval"](raw_image).unsqueeze(0).to(device)
             for raw_image in raw_images
@@ -56,8 +57,7 @@ def finetune_model(id: str):
 
         # Update the database with the extracted features
         images.parquet_data = parquet_file.read()
-        images.save()
-
+        db.session.commit()
 
 def similarity_search(id: str, images: list, num_limit=5, precision_thr=0.0):
     """Search for similar images in a given collection."""
