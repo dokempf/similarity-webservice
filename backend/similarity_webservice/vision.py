@@ -1,9 +1,9 @@
+from datetime import datetime, timezone
 import torch
 from PIL import Image
 import lavis
-from datetime import datetime, timezone
 from lavis.models import load_model_and_preprocess
-from similarity_webservice.model import Images, Collection
+from similarity_webservice.model import db, Images, Collection
 import urllib.request
 import pandas as pd
 import numpy as np
@@ -45,8 +45,10 @@ def finetune_model(id: str):
 
     # Perform actions on rows with missing data
     for row in rows_with_missing_data:
-   
-        raw_images = [Image.open(urllib.request.urlopen(image[0])).convert("RGB") for image in images.content]
+        raw_images = [
+            Image.open(urllib.request.urlopen(image[0])).convert("RGB")
+            for image in images.content
+        ]
         preprocessed_image = [
             vis_processors["eval"](raw_image).unsqueeze(0).to(device)
             for raw_image in raw_images
@@ -61,7 +63,11 @@ def finetune_model(id: str):
 
         # Update the database with the extracted features
         images.parquet_data = parquet_file.read()
+
+        coll = Collection.query.filter(Collection.id == id).one()
+        coll.last_finetuned = datetime.now(timezone.utc)
         db.session.commit()
+
 
 def similarity_search(id: str, images: list, num_limit=5, precision_thr=0.0):
     """Search for similar images in a given collection."""
@@ -75,7 +81,9 @@ def similarity_search(id: str, images: list, num_limit=5, precision_thr=0.0):
     model.to(device)
     # preprocess upload images and calculate features
     preprocessed_image = [
-        vis_processors["eval"](Image.open(img).convert("RGB")).unsqueeze(0).to(device)
+        vis_processors["eval"](Image.open(io.BytesIO(img)).convert("RGB"))
+        .unsqueeze(0)
+        .to(device)
         for img in images
     ]
     multi_features_stacked = extract_features(preprocessed_image, model)

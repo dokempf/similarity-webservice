@@ -11,6 +11,7 @@ from similarity_webservice.model import (
 )
 from similarity_webservice.vision import finetune_model, similarity_search
 
+import base64
 import flask
 import flask_cors
 import logging
@@ -163,20 +164,12 @@ def create_app():
                 400,
             )
 
-    @app.route("/api/search", methods=["GET"])
-    def route_search():
+    @app.route("/api/collection/<id>/search", methods=["POST"])
+    def route_search(id):
         # Extract the image from the request
-        if "image" not in flask.request.files:
-            return flask.jsonify(message="Image is missing", message_type="error"), 400
-        image = flask.request.files["image"]
-
-        # Extract relevant data from the request
-        data = flask.request.json
-        if "id" not in data:
-            return flask.jsonify(message="ID is missing", message_type="error"), 400
-        id = data["id"]
-
+        image = base64.b64decode(flask.request.data)
         return flask.jsonify(similarity_search(id, [image]))
+
     with app.app_context():
         db.create_all()
 

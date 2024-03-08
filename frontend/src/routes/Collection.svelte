@@ -158,7 +158,7 @@
                     <Modal title="Model finetuning" bind:open={finetune_modal[id]} outsideclose autoclose>
                       <P>Finetuning the model will take some time and GPU resources. Are you sure you want to continue?</P>
                       <svelte:fragment slot="footer">
-                        <Button color="blue" on:click={() => (finetuneModel(id))}>Start finetuning</Button>
+                        <Button color="blue" on:click={() => (finetuneModel(id, apikey))}>Start finetuning</Button>
                       </svelte:fragment>
                     </Modal>
                   </div>

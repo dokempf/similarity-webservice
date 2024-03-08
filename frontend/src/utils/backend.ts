@@ -13,8 +13,8 @@ export async function getCollection (collectionId: string): Promise<object> {
   return await get('/collection/' + collectionId + '/info', {})
 }
 
-export async function finetuneModel (collectionId: string): Promise<void> {
-  console.log('Finetuning model for collection ' + collectionId)
+export async function finetuneModel (collectionId: string, key: string): Promise<void> {
+  await post('/collection/' + collectionId + '/finetune', key, {})
 }
 
 export async function createDataset (collectionName: string, heidiconTag: string, key: string): Promise<object> {
