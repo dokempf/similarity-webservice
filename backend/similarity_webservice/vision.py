@@ -37,17 +37,15 @@ def finetune_model(id: str):
         is_eval=True,
     )
     model.to(device)
-    # Fetch the URLs of the images from the database
-    images = Images.query.filter(Images.collection == id).one()
 
-    # For each image of collection we check if images do not have a parquet file, extract features for particular image and save them
-    rows_with_missing_data = Images.query.filter(Images.parquet_data.is_(None)).all()
+    #Fetch the URLs of the images from the database
+    rows_with_missing_parquet = Images.query.filter(Images.parquet_data.is_(None)).all()
 
     # Perform actions on rows with missing data
-    for row in rows_with_missing_data:
+    for row in rows_with_missing_parquet:
         raw_images = [
             Image.open(urllib.request.urlopen(image[0])).convert("RGB")
-            for image in images.content
+            for image in row.content
         ]
         preprocessed_image = [
             vis_processors["eval"](raw_image).unsqueeze(0).to(device)
@@ -57,12 +55,13 @@ def finetune_model(id: str):
 
         # Convert features to DataFrame and save to Parquet
         features_df = pd.DataFrame(features_image_stacked.cpu().numpy())
+        print(features_df)
         parquet_file = io.BytesIO()
         features_df.to_parquet(parquet_file)
         parquet_file.seek(0)
 
         # Update the database with the extracted features
-        images.parquet_data = parquet_file.read()
+        row.parquet_data = parquet_file.read()
 
         coll = Collection.query.filter(Collection.id == id).one()
         coll.last_finetuned = datetime.now(timezone.utc)
@@ -91,6 +90,7 @@ def similarity_search(id: str, images: list, num_limit=5, precision_thr=0.0):
     # Load features for the collection from the database
     images_data = Images.query.filter(Images.collection == id).one()
     feature_df = pd.read_parquet(io.BytesIO(images_data.parquet_data))
+    print(feature_df)
     features_tensor = torch.tensor(feature_df.values).to(device)
     feature_df["id"] = images_data.id
 
