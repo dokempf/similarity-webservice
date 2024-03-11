@@ -40,14 +40,14 @@ def finetune_model(id: str):
     # Fetch the URLs of the images from the database
     images = Images.query.filter(Images.collection == id).one()
 
-    # For each image of collection we check if images do not have a parquet file, extract features for particular image and save them
+    # Fetch the URLs of the images from the database
     rows_with_missing_data = Images.query.filter(Images.parquet_data.is_(None)).all()
 
     # Perform actions on rows with missing data
     for row in rows_with_missing_data:
         raw_images = [
             Image.open(urllib.request.urlopen(image[0])).convert("RGB")
-            for image in images.content
+            for image in row.content
         ]
         preprocessed_image = [
             vis_processors["eval"](raw_image).unsqueeze(0).to(device)
@@ -62,7 +62,7 @@ def finetune_model(id: str):
         parquet_file.seek(0)
 
         # Update the database with the extracted features
-        images.parquet_data = parquet_file.read()
+        row.parquet_data = parquet_file.read()
 
         coll = Collection.query.filter(Collection.id == id).one()
         coll.last_finetuned = datetime.now(timezone.utc)
