@@ -99,7 +99,13 @@ def similarity_search(
         features_tensor, multi_features_stacked.unsqueeze(-1)
     ).squeeze()
     if len(feature_df) == 1:
-        return images_data.content[0][1]
+        return [
+            {
+                "image_url": images_data.content[0][0],
+                "repo_url": images_data.content[0][1],
+                "score": similarity_scores.item(),
+            }
+        ]
 
     similar_image_indices = torch.nonzero(
         similarity_scores >= precision_thr, as_tuple=False
@@ -109,7 +115,14 @@ def similarity_search(
     )
 
     # Get the IDs of the most similar images
-    most_similar_image_urls = [images_data.content[i][1] for i in sorted_indices]
-    # in images_data.content[i][1], 1 - because this a link for printing(0-for searching)
+    most_similar_images = []
+    for i in sorted_indices[:num_limit]:
+        most_similar_images.append(
+            {
+                "image_url": images_data.content[i][0],
+                "repo_url": images_data.content[i][1],
+                "score": similarity_scores[i].item(),
+            }
+        )
 
-    return most_similar_image_urls[:num_limit]
+    return most_similar_images
