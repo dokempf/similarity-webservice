@@ -170,7 +170,11 @@ def create_app():
     @app.route("/api/collection/<id>/search", methods=["POST"])
     def route_search(id):
         # Extract the image from the request
-        image = base64.b64decode(flask.request.data)
+        if b"," in flask.request.data:
+            image = base64.b64decode(flask.request.data.decode("utf-8").split(",")[1])
+        else:
+            image = base64.b64decode(flask.request.data)
+
         return flask.jsonify(similarity_search(id, [image], model, vis_processors))
 
     with app.app_context():

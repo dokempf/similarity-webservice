@@ -110,7 +110,7 @@
                     {#if details.heidicon_tag !== null}
                       <Button color="blue" on:click={() => (updateHeidicon(id, apikey))}><DatabaseOutline /><FileImportOutline />Synchronize with HeidIcon</Button>
                     {/if}
-                    <form action="{import.meta.env.VITE_BACKEND_BASE_URL}/api/collection/{id}/csvfile" class="inline">
+                    <form action="{import.meta.env.VITE_BACKEND_BASE_URL}/collection/{id}/csvfile" class="inline">
                       <Button color="blue" type="submit"><FileCsvOutline /><DownloadOutline />Download Data</Button>
                     </form>
                     <Button color="blue" on:click={() => (delete_modal[id] = true)}><TrashBinOutline />Delete Dataset</Button>

@@ -4,9 +4,13 @@ export async function getCollections (): Promise<object> {
   const collections = await get('/collection/list', {})
   const collectionOptions = []
   for (const c of collections.ids) {
-    collectionOptions.push({ id: c, name: 'Collection ' + c })
+    collectionOptions.push({ value: c, id: c, name: 'Collection ' + c })
   }
   return collectionOptions
+}
+
+export async function similaritySearch (collectionId: string, query: string): Promise<object> {
+  return await postFile('/collection/' + collectionId + '/search', '', query, 'base64')
 }
 
 export async function getCollection (collectionId: string): Promise<object> {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, Dropzone, Gallery, Label, Select, Spinner } from "flowbite-svelte";
-  import { getCollections } from "../utils/backend";
+  import { getCollections, similaritySearch } from "../utils/backend";
 
   function dropHandle(event) {
     event.preventDefault();
@@ -16,12 +16,13 @@
     }
   }
 
-  function similaritySearch() {
-    console.log("Search started");
+  function similaritySearchCall() {
+    similaritySearch(collection_selection, query[0].src);
     ongoing_query = true;
   }
 
   // The state of the search site
+  let collection_selection = 0;
   let query = [];
   let ongoing_query = false;
 </script>
@@ -36,11 +37,11 @@
             <p>No collections available</p>
           {:else}
             Dataset selection
-            <Select class="mt-2" items={options} />
+            <Select class="mt-2" items={options} bind:value={collection_selection} />
           {/if}
       {/await}
     </Label>
-    <Button class="w-full" color="blue" disabled="{ongoing_query}" on:click={similaritySearch}>
+    <Button class="w-full" color="blue" disabled="{ongoing_query}" on:click={similaritySearchCall}>
       Start Search {#if ongoing_query} <Spinner size="4" color="white"/> {/if}
     </Button>
     <!-- https://flowbite-svelte.com/docs/forms/file-input -->
