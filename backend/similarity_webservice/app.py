@@ -8,6 +8,7 @@ from similarity_webservice.model import (
     update_collection_content,
     update_collection_name,
     images_as_csv,
+    load_model_and_vis_preprocess,
 )
 from similarity_webservice.vision import finetune_model, similarity_search
 
@@ -42,6 +43,8 @@ def create_app():
 
     # Initialize the database
     db.init_app(app)
+
+    model, vis_processors = load_model_and_vis_preprocess()
 
     @app.route("/api/verify", methods=["POST"])
     @require_api_key
@@ -152,7 +155,7 @@ def create_app():
     @require_api_key
     def route_finetune_collection(id):
         try:
-            finetune_model(id)
+            finetune_model(id, model, vis_processors)
             return flask.jsonify(
                 message="Model finetuning started", message_type="push"
             )
@@ -168,7 +171,7 @@ def create_app():
     def route_search(id):
         # Extract the image from the request
         image = base64.b64decode(flask.request.data)
-        return flask.jsonify(similarity_search(id, [image]))
+        return flask.jsonify(similarity_search(id, [image], model, vis_processors))
 
     with app.app_context():
         db.create_all()

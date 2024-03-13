@@ -1,8 +1,6 @@
 from datetime import datetime, timezone
 import torch
 from PIL import Image
-import lavis
-from lavis.models import load_model_and_preprocess
 from similarity_webservice.model import db, Images, Collection
 import urllib.request
 import pandas as pd
@@ -26,18 +24,10 @@ def extract_features(images: list, model):
     return features_image_stacked
 
 
-def finetune_model(id: str):
+def finetune_model(id: str, model, vis_processors):
     """Finetune a model with a given collection."""
 
-    # The collection will be consist of the link to the image and for printing
     device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
-    model, vis_processors, _ = load_model_and_preprocess(
-        name="blip2_feature_extractor",
-        model_type="coco",
-        is_eval=True,
-    )
-    model.to(device)
-    # Fetch the URLs of the images from the database
     row_with_data = Images.query.filter(Images.collection == id).one()
     content_list = row_with_data.content
 
@@ -81,17 +71,12 @@ def finetune_model(id: str):
         db.session.commit()
 
 
-def similarity_search(id: str, images: list, num_limit=5, precision_thr=0.0):
+def similarity_search(
+    id: str, images: list, model, vis_processors, num_limit=5, precision_thr=0.0
+):
     """Search for similar images in a given collection."""
 
     device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
-    model, vis_processors, _ = load_model_and_preprocess(
-        name="blip2_feature_extractor",
-        model_type="coco",
-        is_eval=True,
-    )
-    model.to(device)
-    # preprocess upload images and calculate features
     preprocessed_image = [
         vis_processors["eval"](Image.open(io.BytesIO(img)).convert("RGB"))
         .unsqueeze(0)
