@@ -38,32 +38,44 @@ def finetune_model(id: str):
     )
     model.to(device)
     # Fetch the URLs of the images from the database
-    images = Images.query.filter(Images.collection == id).one()
+    row_with_data = Images.query.filter(Images.collection == id).one()
+    content_list = row_with_data.content
 
-    # Fetch the URLs of the images from the database
-    rows_with_missing_data = Images.query.filter(Images.parquet_data.is_(None)).all()
+    if row_with_data.parquet_data is None or len(row_with_data.content) != len(
+        pd.read_parquet(io.BytesIO(row_with_data.parquet_data))
+    ):
+        #Update finetune_time
+        coll = Collection.query.filter(Collection.id == id).one()
+        coll.last_finetuned = datetime.now(timezone.utc)
+        db.session.commit()
+        
+        if row_with_data.parquet_data is None:
+            parquet_df = pd.DataFrame()
+            parquet_feature_tensor = torch.empty(0).to(device)
+        else:
+            parquet_df = pd.read_parquet(io.BytesIO(row_with_data.parquet_data))
+            parquet_feature_tensor = torch.tensor(parquet_df.values).to(device)
 
-    # Perform actions on rows with missing data
-    for row in rows_with_missing_data:
-        raw_images = [
-            Image.open(urllib.request.urlopen(image[0])).convert("RGB")
-            for image in row.content
-        ]
-        preprocessed_image = [
-            vis_processors["eval"](raw_image).unsqueeze(0).to(device)
-            for raw_image in raw_images
-        ]
-        features_image_stacked = extract_features(preprocessed_image, model)
+        for i in range(len(parquet_df), len(content_list)):
+            raw_image = Image.open(urllib.request.urlopen(content_list[i][0])).convert(
+                "RGB"
+            )
+            preprocessed_image = [
+                vis_processors["eval"](raw_image).unsqueeze(0).to(device)
+            ]
 
-        # Convert features to DataFrame and save to Parquet
-        features_df = pd.DataFrame(features_image_stacked.cpu().numpy())
+            features_image_stacked = extract_features(preprocessed_image, model)
+            # Concatenate extracted features
+            parquet_feature_tensor = torch.cat(
+                [parquet_feature_tensor, features_image_stacked]
+            )
+
+        all_feature_df = pd.DataFrame(parquet_feature_tensor.cpu().numpy())
         parquet_file = io.BytesIO()
-        features_df.to_parquet(parquet_file)
+        all_feature_df.to_parquet(parquet_file)
         parquet_file.seek(0)
 
-        # Update the database with the extracted features
-        row.parquet_data = parquet_file.read()
-
+        row_with_data.parquet_data = parquet_file.read()
         coll = Collection.query.filter(Collection.id == id).one()
         coll.last_finetuned = datetime.now(timezone.utc)
         db.session.commit()
@@ -87,26 +99,3 @@ def similarity_search(id: str, images: list, num_limit=5, precision_thr=0.0):
         for img in images
     ]
     multi_features_stacked = extract_features(preprocessed_image, model)
-
-    # Load features for the collection from the database
-    images_data = Images.query.filter(Images.collection == id).one()
-    feature_df = pd.read_parquet(io.BytesIO(images_data.parquet_data))
-    features_tensor = torch.tensor(feature_df.values).to(device)
-    feature_df["id"] = images_data.id
-
-    # calculate similarity scores, filter and sort them
-    similarity_scores = torch.matmul(
-        features_tensor, multi_features_stacked.unsqueeze(-1)
-    ).squeeze()
-
-    similar_image_indices = torch.nonzero(
-        similarity_scores >= precision_thr, as_tuple=False
-    ).squeeze()
-
-    sorted_indices = sorted(
-        similar_image_indices.tolist(), key=lambda x: similarity_scores[x], reverse=True
-    )
-
-    # Get the IDs of the most similar images
-    most_similar_image_ids = [feature_df.iloc[i]["id"] for i in sorted_indices]
-    return most_similar_image_ids[:num_limit]
