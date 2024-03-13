@@ -44,11 +44,11 @@ def finetune_model(id: str):
     if row_with_data.parquet_data is None or len(row_with_data.content) != len(
         pd.read_parquet(io.BytesIO(row_with_data.parquet_data))
     ):
-        #Update finetune_time
+        # Update finetune_time
         coll = Collection.query.filter(Collection.id == id).one()
         coll.last_finetuned = datetime.now(timezone.utc)
         db.session.commit()
-        
+
         if row_with_data.parquet_data is None:
             parquet_df = pd.DataFrame()
             parquet_feature_tensor = torch.empty(0).to(device)
