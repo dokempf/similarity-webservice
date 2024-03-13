@@ -118,12 +118,7 @@ def update_collection_content(id: str, content: str):
 
     # Update the content of the collection
     images = Images.query.where(Images.collection == id).one()
-
-    if not images.content:
-        images.content = content
-    else:
-        updated_content = images.content + content
-        images.content = updated_content
+    images.content = content
 
     # Update the last modified timestamp
     coll.last_modified = datetime.now(timezone.utc)
