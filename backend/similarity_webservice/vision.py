@@ -99,3 +99,32 @@ def similarity_search(id: str, images: list, num_limit=5, precision_thr=0.0):
         for img in images
     ]
     multi_features_stacked = extract_features(preprocessed_image, model)
+
+    # Load features for the collection from the database
+    images_data = Images.query.filter(Images.collection == id).one()
+
+    if images_data.parquet_data is not None:
+        feature_df = pd.read_parquet(io.BytesIO(images_data.parquet_data))
+        features_tensor = torch.tensor(feature_df.values).to(device)
+    else:
+        return
+
+    # calculate similarity scores, filter and sort them
+    similarity_scores = torch.matmul(
+        features_tensor, multi_features_stacked.unsqueeze(-1)
+    ).squeeze()
+    if len(feature_df) == 1:
+        return images_data.content[0][1]
+
+    similar_image_indices = torch.nonzero(
+        similarity_scores >= precision_thr, as_tuple=False
+    ).squeeze()
+    sorted_indices = sorted(
+        similar_image_indices.tolist(), key=lambda x: similarity_scores[x], reverse=True
+    )
+
+    # Get the IDs of the most similar images
+    most_similar_image_urls = [images_data.content[i][1] for i in sorted_indices]
+    # in images_data.content[i][1], 1 - because this a link for printing(0-for searching)
+
+    return most_similar_image_urls[:num_limit]
