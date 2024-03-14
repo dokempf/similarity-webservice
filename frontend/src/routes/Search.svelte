@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Button, Dropzone, Gallery, Label, Select, Spinner } from "flowbite-svelte";
   import { getCollections, similaritySearch } from "../utils/backend";
+  import LinkedGallery from "../components/LinkedGallery.svelte";
 
   function dropHandle(event) {
     event.preventDefault();
@@ -16,15 +17,22 @@
     }
   }
 
-  function similaritySearchCall() {
-    similaritySearch(collection_selection, query[0].src);
+  async function similaritySearchCall() {
     ongoing_query = true;
+    const result = await similaritySearch(collection_selection, query[0].src);
+    let update = []
+    for(const img of result) {
+      update.push({ src: img.image_url, href: img.repo_url });
+    }
+    result_images = update
+    ongoing_query = false;
   }
 
   // The state of the search site
   let collection_selection = 0;
   let query = [];
   let ongoing_query = false;
+  let result_images = [];
 </script>
 
 <div class="h-full w-full grid grid-cols-2 gap-8 pt-8">
@@ -60,12 +68,6 @@
   </div>
   <div>
     Similarity Search Results:
-    <Gallery class="h-full bg-slate-50 gap-4 grid-cols-3">
-      <!-- https://flowbite-svelte.com/docs/media/gallery -->
-      <!-- Most likely, we will need to add the images one by one with a svelte loop -->
-      <!-- because we cannot wrap the href elements out of the box. Should probably use -->
-      <!-- a masonry grid for layouting. Delaying this until we implemented the similarity -->
-      <!-- search in the backend, so that we have the real data around. -->
-    </Gallery>
+    <LinkedGallery class="h-full bg-slate-50 gap-4 grid-cols-3" items={result_images} />
   </div>
 </div>
