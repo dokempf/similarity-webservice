@@ -1,3 +1,6 @@
+import base64
+
+
 def test_verify(client, apikey):
     res = client.post("/api/verify", headers={"API-Key": apikey})
     assert res.status_code == 200
@@ -112,12 +115,24 @@ def test_csvfile_download_invalid_id(client):
     assert res.status_code == 400
 
 
-# Currently not yet implemented
-# def test_finetune_collection(client, apikey):
-#     res = client.post("/api/collection/1/finetune", headers={"API-Key": apikey})
+def test_finetune_collection(client, apikey):
+    res = client.post("/api/collection/1/finetune", headers={"API-Key": apikey}, data="url1_test1, url2_test1\nurl2_test1, url2_test2")
+    assert res.status_code == 200
 
 
-# Currently not yet implemented
-# def test_search(client):
-#     res = client.get("/api/search")
+def test_finetune_collection_invalid_id(client, apikey):
+    res = client.post("/api/collection/112/finetune", headers={"API-Key": apikey}, data="url1_test1, url2_test1\nurl2_test1, url2_test2")
+    assert res.status_code == 400
+
+#Need image to check
+# def test_similarity_search(client):
+   
+#     res = client.post("/api/collection/1/search")
 #     assert res.status_code == 200
+
+
+# def test_similarity_search_invalid_id(client):
+
+#     res = client.post("/api/collection/112/search")
+#     assert res.status_code == 400
+ 

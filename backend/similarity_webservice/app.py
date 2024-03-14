@@ -12,7 +12,7 @@ from similarity_webservice.model import (
 )
 from similarity_webservice.vision import finetune_model, similarity_search
 
-import base64
+import base64 
 import flask
 import flask_cors
 import logging
@@ -24,7 +24,6 @@ import sqlalchemy
 # * Fast response time on the first query
 # * Avoiding memory overflows in the test suite
 model, vis_processors = load_model_and_vis_preprocess()
-
 
 def create_app():
     """Create the Flask app for similarity search webservice.
@@ -174,12 +173,21 @@ def create_app():
     @app.route("/api/collection/<id>/search", methods=["POST"])
     def route_search(id):
         # Extract the image from the request
-        if b"," in flask.request.data:
-            image = base64.b64decode(flask.request.data.decode("utf-8").split(",")[1])
-        else:
-            image = base64.b64decode(flask.request.data)
+        try:
+            if b"," in flask.request.data:
+                image = base64.b64decode(flask.request.data.decode("utf-8").split(",")[1])
+            else:
+                image = base64.b64decode(flask.request.data)
 
-        return flask.jsonify(similarity_search(id, [image], model, vis_processors))
+            return flask.jsonify(similarity_search(id, [image], model, vis_processors))
+        
+        except sqlalchemy.exc.NoResultFound:
+            return (
+                flask.jsonify(
+                    message=f"Collection with id={id} not found", message_type="error"
+                ),
+                400,
+            )
 
     with app.app_context():
         db.create_all()
