@@ -20,6 +20,12 @@ import os
 import sqlalchemy
 
 
+# Load the model and the visual preprocessors exactly once this is important for
+# * Fast response time on the first query
+# * Avoiding memory overflows in the test suite
+model, vis_processors = load_model_and_vis_preprocess()
+
+
 def create_app():
     """Create the Flask app for similarity search webservice.
 
@@ -43,8 +49,6 @@ def create_app():
 
     # Initialize the database
     db.init_app(app)
-
-    model, vis_processors = load_model_and_vis_preprocess()
 
     @app.route("/api/verify", methods=["POST"])
     @require_api_key
