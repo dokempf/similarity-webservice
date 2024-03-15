@@ -10,7 +10,11 @@ from similarity_webservice.model import (
     images_as_csv,
     load_model_and_vis_preprocess,
 )
-from similarity_webservice.vision import finetune_model, similarity_search
+from similarity_webservice.vision import (
+    finetune_model,
+    record_progress,
+    similarity_search,
+)
 
 import base64
 import flask
@@ -18,6 +22,7 @@ import flask_cors
 import logging
 import os
 import sqlalchemy
+import threading
 
 
 # Load the model and the visual preprocessors exactly once this is important for
@@ -158,7 +163,18 @@ def create_app():
     @require_api_key
     def route_finetune_collection(id):
         try:
-            finetune_model(id, model, vis_processors)
+            record_progress(id, 0)
+
+            def _threaded_finetune_model(ctx, id, model, vis_processors):
+                ctx.push()
+                finetune_model(id, model, vis_processors)
+
+            thread = threading.Thread(
+                target=_threaded_finetune_model,
+                args=(app.app_context(), id, model, vis_processors),
+            )
+            thread.daemon = True
+            thread.start()
             return flask.jsonify(
                 message="Model finetuning started", message_type="push"
             )

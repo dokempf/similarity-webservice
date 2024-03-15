@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import torch
 from PIL import Image
-from similarity_webservice.model import db, Images, Collection
+from similarity_webservice.model import db, Images, Collection, record_progress
 import urllib.request
 import pandas as pd
 import numpy as np
@@ -33,9 +33,6 @@ def finetune_model(id: str, model, vis_processors):
     content_list = row_with_data.content
 
     if row_with_data.parquet_data is None or (coll.last_modified > coll.last_finetuned):
-        coll.last_finetuned = datetime.now(timezone.utc)
-        db.session.commit()
-
         if row_with_data.parquet_data is None:
             parquet_df = pd.DataFrame()
             parquet_feature_tensor = torch.empty(0).to(device)
@@ -43,10 +40,8 @@ def finetune_model(id: str, model, vis_processors):
             parquet_df = pd.read_parquet(io.BytesIO(row_with_data.parquet_data))
             parquet_feature_tensor = torch.tensor(parquet_df.values).to(device)
 
-        for i in range(len(parquet_df), len(content_list)):
-            raw_image = Image.open(urllib.request.urlopen(content_list[i][0])).convert(
-                "RGB"
-            )
+        for i, content in enumerate(content_list):
+            raw_image = Image.open(urllib.request.urlopen(content[0])).convert("RGB")
             preprocessed_image = [
                 vis_processors["eval"](raw_image).unsqueeze(0).to(device)
             ]
@@ -57,13 +52,16 @@ def finetune_model(id: str, model, vis_processors):
                 [parquet_feature_tensor, features_image_stacked]
             )
 
+            record_progress(id, int((i + 1) / len(content_list) * 100))
+
         all_feature_df = pd.DataFrame(parquet_feature_tensor.cpu().numpy())
         parquet_file = io.BytesIO()
         all_feature_df.to_parquet(parquet_file)
         parquet_file.seek(0)
 
         row_with_data.parquet_data = parquet_file.read()
-        coll = Collection.query.filter(Collection.id == id).one()
+
+        coll.finetuning_progess = None
         coll.last_finetuned = datetime.now(timezone.utc)
         db.session.commit()
 

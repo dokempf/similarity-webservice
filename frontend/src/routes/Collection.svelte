@@ -54,10 +54,14 @@
     }
   }
 
+  async function finetuneModelTrigger(id) {
+    await finetuneModel(id, apikey)
+    finetune_modal[id] = false
+    reload = !reload;
+  }
+
   async function verifyAPIKeyTrigger() {
     const response = await verifyAPIKey(apikey)
-    apikey_verified = response.message === "API key is valid"
-    console.log(apikey_verified)
   }
 </script>
 
@@ -95,10 +99,14 @@
                     <div class="text-sm">
                       <P>ID: {details["id"]}, contains {details["number_of_images"]} images</P>
                       <P>Last modified: {details["last_modified"]}</P>
-                      {#if details["last_finetuned"] !== null}
-                        <P>Last finetuned: {details["last_finetuned"]} {#if details.requires_finetuning}<b>(outdated!)</b>{/if}</P>
+                      {#if details.finetuning_progess === null }
+                        {#if details["last_finetuned"] !== null}
+                          <P>Last finetuned: {details["last_finetuned"]} {#if details.requires_finetuning}<b>(outdated!)</b>{/if}</P>
+                        {:else}
+                          <P>Not yet finetuned</P>
+                        {/if}
                       {:else}
-                        <P>Not yet finetuned</P>
+                        <P>Finetuning in progress: { details.finetuning_progess }%</P>
                       {/if}
                     </div>
                   </div>
@@ -158,7 +166,7 @@
                     <Modal title="Model finetuning" bind:open={finetune_modal[id]} outsideclose autoclose>
                       <P>Finetuning the model will take some time and GPU resources. Are you sure you want to continue?</P>
                       <svelte:fragment slot="footer">
-                        <Button color="blue" on:click={() => (finetuneModel(id, apikey))}>Start finetuning</Button>
+                        <Button color="blue" on:click={() => (finetuneModelTrigger(id))}>Start finetuning</Button>
                       </svelte:fragment>
                     </Modal>
                   </div>

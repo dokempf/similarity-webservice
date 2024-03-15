@@ -65,6 +65,7 @@ class Collection(db.Model):
     name: str = db.Column(db.Text, nullable=False)
     last_modified: datetime = db.Column(db.DateTime, nullable=False)
     last_finetuned: datetime = db.Column(db.DateTime)
+    finetuning_progess: float = db.Column(db.Integer, nullable=True, default=None)
     heidicon_tag: str = db.Column(db.Text, nullable=True)
 
 
@@ -152,8 +153,19 @@ def collection_info(id):
 
     # Add some derived information
     info["number_of_images"] = len(images.content)
-    info["requires_finetuning"] = coll.last_modified > coll.last_finetuned
+    if coll.last_modified is not None and coll.last_finetuned is not None:
+        info["requires_finetuning"] = coll.last_modified > coll.last_finetuned
+    else:
+        info["requires_finetuning"] = coll.last_modified is not None
     return info
+
+
+def record_progress(id: str, progress: int = 0):
+    """Record the progress of a finetuning operation."""
+
+    coll = Collection.query.where(Collection.id == id).one()
+    coll.finetuning_progess = progress
+    db.session.commit()
 
 
 @dataclasses.dataclass
