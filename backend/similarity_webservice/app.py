@@ -103,7 +103,7 @@ def create_app():
             return flask.send_file(
                 images_as_csv(id),
                 as_attachment=True,
-                download_name=f"{collection_info(id).name}.csv",
+                download_name=f"{collection_info(id)['name']}.csv",
                 mimetype="text/csv",
             )
         except sqlalchemy.exc.NoResultFound:
