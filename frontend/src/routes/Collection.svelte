@@ -93,10 +93,10 @@
                   <div>
                     <h2 class="text-xl font-semibold">{details.name}</h2>
                     <div class="text-sm">
-                      <P>ID: {details["id"]}</P>
+                      <P>ID: {details["id"]}, contains {details["number_of_images"]} images</P>
                       <P>Last modified: {details["last_modified"]}</P>
                       {#if details["last_finetuned"] !== null}
-                        <P>Last finetuned: {details["last_finetuned"]}</P>
+                        <P>Last finetuned: {details["last_finetuned"]} {#if details.requires_finetuning}<b>(outdated!)</b>{/if}</P>
                       {:else}
                         <P>Not yet finetuned</P>
                       {/if}

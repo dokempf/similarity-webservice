@@ -112,8 +112,7 @@ def create_app():
     @app.route("/api/collection/<id>/info", methods=["GET"])
     def route_info_collection(id):
         try:
-            coll = collection_info(id)
-            return flask.jsonify(coll)
+            return flask.jsonify(**collection_info(id))
         except sqlalchemy.exc.NoResultFound:
             return (
                 flask.jsonify(
