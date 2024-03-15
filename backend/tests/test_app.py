@@ -1,3 +1,4 @@
+import os
 import base64
 
 
@@ -133,14 +134,23 @@ def test_finetune_collection_invalid_id(client, apikey):
     assert res.status_code == 400
 
 
-# Need image to check
-# def test_similarity_search(client):
+def test_similarity_search(client):
+    image_path = os.path.join(os.path.dirname(__file__), "dum_similarity_img.png")
+    with open(image_path, "rb") as img_file:
+        image_data = img_file.read()
 
-#     res = client.post("/api/collection/1/search")
-#     assert res.status_code == 200
+    # Encode the image data as base64
+    encoded_image = base64.b64encode(image_data)
+    res = client.post("/api/collection/1/search", data = encoded_image)
+    assert res.status_code == 200
 
 
-# def test_similarity_search_invalid_id(client):
+def test_similarity_search_invalid_id(client):
+    image_path = os.path.join(os.path.dirname(__file__), "dum_similarity_img.png")
+    with open(image_path, "rb") as img_file:
+        image_data = img_file.read()
 
-#     res = client.post("/api/collection/112/search")
-#     assert res.status_code == 400
+    # Encode the image data as base64
+    encoded_image = base64.b64encode(image_data)
+    res = client.post("/api/collection/112/search", data =  encoded_image)
+    assert res.status_code == 400
