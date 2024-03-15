@@ -29,13 +29,10 @@ def finetune_model(id: str, model, vis_processors):
 
     device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
     row_with_data = Images.query.filter(Images.collection == id).one()
+    coll = Collection.query.filter(Collection.id == id).one()
     content_list = row_with_data.content
 
-    if row_with_data.parquet_data is None or len(row_with_data.content) != len(
-        pd.read_parquet(io.BytesIO(row_with_data.parquet_data))
-    ):
-        # Update finetune_time
-        coll = Collection.query.filter(Collection.id == id).one()
+    if row_with_data.parquet_data is None or (coll.last_modified > coll.last_finetuned):
         coll.last_finetuned = datetime.now(timezone.utc)
         db.session.commit()
 
