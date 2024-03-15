@@ -4,6 +4,7 @@
 [build-system]
 requires = [
     "setuptools >=61",
+    "rust",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -18,7 +19,7 @@ readme = "README.md"
 maintainers = [
     { name = "Dominic Kempf", email = "ssc@iwr.uni-heidelberg.de" },
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.8, <3.12"
 license = { text = "MIT" }
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -33,7 +34,7 @@ dependencies = [
     "flask-sqlalchemy",
     "requests",
     "Pillow",
-    "torch<2.1.0",
+    "torch",
     "salesforce-lavis",
 ]
 
