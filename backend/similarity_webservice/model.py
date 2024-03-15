@@ -142,7 +142,18 @@ def list_collections():
 def collection_info(id):
     """Get information about a collection."""
 
-    return Collection.query.filter_by(id=id).one()
+    # Get the data from the Collection and Images table
+    coll = Collection.query.where(Collection.id == id).one()
+    images = Images.query.where(Images.collection == id).one()
+
+    # Convert to a dictionary and remove the SQLAlchemy state
+    info = coll.__dict__
+    info.pop("_sa_instance_state")
+
+    # Add some derived information
+    info["number_of_images"] = len(images.content)
+    info["requires_finetuning"] = coll.last_modified > coll.last_finetuned
+    return info
 
 
 @dataclasses.dataclass
