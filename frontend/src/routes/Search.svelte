@@ -58,13 +58,10 @@
       on:drop={dropHandle}
       on:dragover={(event) => { event.preventDefault(); }}
       >
-      {#if query.length === 0}
-        <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-        <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG or GIF</p>
-      {:else}
-        <Gallery items={query} class="grid-cols-1" />
-      {/if}
+      <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG or GIF</p>
     </Dropzone>
+    <Gallery items={query} class="grid-cols-1 max-h-full gap-4" />
   </div>
   <div>
     Similarity Search Results:
