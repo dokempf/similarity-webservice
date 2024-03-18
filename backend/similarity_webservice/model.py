@@ -100,6 +100,10 @@ def delete_collection(id: int):
 
     coll = Collection.query.where(Collection.id == id).one()
     db.session.delete(coll)
+
+    images = Images.query.where(Images.collection == id).one()
+    db.session.delete(images)
+
     db.session.commit()
 
 
