@@ -120,7 +120,7 @@ def test_finetune_collection(client, apikey):
     res = client.post(
         "/api/collection/1/finetune",
         headers={"API-Key": apikey},
-        data="url1_test1, url2_test1\nurl2_test1, url2_test2",
+        data="https://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs, https://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs\nhttps://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs, https://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs",
     )
     assert res.status_code == 200
 
@@ -129,7 +129,7 @@ def test_finetune_collection_invalid_id(client, apikey):
     res = client.post(
         "/api/collection/112/finetune",
         headers={"API-Key": apikey},
-        data="url1_test1, url2_test1\nurl2_test1, url2_test2",
+        data="https://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs, https://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs\nhttps://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs, https://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs",
     )
     assert res.status_code == 400
 
@@ -141,7 +141,7 @@ def test_similarity_search(client):
 
     # Encode the image data as base64
     encoded_image = base64.b64encode(image_data)
-    res = client.post("/api/collection/1/search", data = encoded_image)
+    res = client.post("/api/collection/1/search", data=encoded_image)
     assert res.status_code == 200
 
 
@@ -152,5 +152,5 @@ def test_similarity_search_invalid_id(client):
 
     # Encode the image data as base64
     encoded_image = base64.b64encode(image_data)
-    res = client.post("/api/collection/112/search", data =  encoded_image)
+    res = client.post("/api/collection/112/search", data=encoded_image)
     assert res.status_code == 400
