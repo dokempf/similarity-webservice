@@ -3,6 +3,17 @@
   import { getCollections, similaritySearch } from "../utils/backend";
   import LinkedGallery from "../components/LinkedGallery.svelte";
 
+  function handleChange(event) {
+    query = [];
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      query.push({ src: e.target.result });
+      query = query;
+    };
+    reader.readAsDataURL(file);
+  }
+
   function dropHandle(event) {
     event.preventDefault();
     const file = event.dataTransfer.items[0];
@@ -36,7 +47,7 @@
 </script>
 
 <div class="h-full w-full grid grid-cols-2 gap-8 pt-8">
-  <div>
+  <div class="pl-20 pr-20">
     <Label>
       {#await getCollections()}
       Loading datasets...
@@ -45,23 +56,25 @@
             <p>No collections available</p>
           {:else}
             Dataset selection
-            <Select class="mt-2" items={options} bind:value={collection_selection} />
+            <Select class="mt-2 w-80 p-4" items={options} bind:value={collection_selection} />
           {/if}
       {/await}
     </Label>
-    <Button class="w-full" color="blue" disabled="{ongoing_query}" on:click={similaritySearchCall}>
+    <Button class="w-80 p-4" color="blue" disabled="{ongoing_query}" on:click={similaritySearchCall}>
       Start Search {#if ongoing_query} <Spinner size="4" color="white"/> {/if}
     </Button>
     <!-- https://flowbite-svelte.com/docs/forms/file-input -->
     <Dropzone
       id="dropzone"
+      on:change={handleChange}
       on:drop={dropHandle}
       on:dragover={(event) => { event.preventDefault(); }}
+      class="w-80"
       >
       <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
       <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG or GIF</p>
     </Dropzone>
-    <Gallery items={query} class="grid-cols-1 max-h-full gap-4" />
+    <Gallery items={query} class="gap-4 p- w-80" />
   </div>
   <div>
     Similarity Search Results:
