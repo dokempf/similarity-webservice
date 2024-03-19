@@ -12,7 +12,6 @@ import requests
 import base64
 
 
-
 def test_extract_features(app):
     device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
     (
@@ -47,7 +46,7 @@ def test_finetune(app, client, apikey):
         assert res.status_code == 200
         # Polling mechanism to wait for the finetuning process to complete
         max_poll_attempts = 10
-        poll_interval_seconds = 1
+        poll_interval_seconds = 5
         for _ in range(max_poll_attempts):
             # Retrieve the updated value of last_finetuned
             res = client.get("/api/collection/3/info")
@@ -90,7 +89,7 @@ def test_similarity_search(app, client, apikey):
 
         # Polling mechanism to wait for the finetuning process to complete
         max_poll_attempts = 10
-        poll_interval_seconds = 1
+        poll_interval_seconds = 5
         for _ in range(max_poll_attempts):
             # Retrieve the updated value of last_finetuned
             res = client.get("/api/collection/3/info")
