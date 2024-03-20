@@ -11,22 +11,9 @@ import flask_sqlalchemy
 import functools
 import io
 
-import torch
-from lavis.models import load_model_and_preprocess
 
 ph = argon2.PasswordHasher()
 db = flask_sqlalchemy.SQLAlchemy()
-
-
-def load_model_and_vis_preprocess():
-    device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
-    model, vis_processors, _ = load_model_and_preprocess(
-        name="blip2_feature_extractor",
-        model_type="coco",
-        is_eval=True,
-    )
-    model.to(device)
-    return model, vis_processors
 
 
 @dataclasses.dataclass

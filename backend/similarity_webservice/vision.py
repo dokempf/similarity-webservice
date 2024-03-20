@@ -4,8 +4,25 @@ from PIL import Image
 from similarity_webservice.model import db, Images, Collection, record_progress
 import urllib.request
 import pandas as pd
-import numpy as np
 import io
+from lavis.models import load_model_and_preprocess
+
+
+# Storage for the singleton model and vis_processors
+model = None
+vis_processors = None
+
+
+def load_model_and_vis_preprocess():
+    global model, vis_processors
+    if model is None:
+        device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
+        model, vis_processors, _ = load_model_and_preprocess(
+            name="blip2_feature_extractor",
+            model_type="coco",
+            is_eval=True,
+        )
+        model.to(device)
 
 
 def extract_features(images: list, model):

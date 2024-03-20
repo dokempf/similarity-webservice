@@ -1,9 +1,5 @@
-from similarity_webservice.vision import (
-    extract_features,
-    finetune_model,
-    similarity_search,
-)
-from similarity_webservice.model import load_model_and_vis_preprocess, Images
+from similarity_webservice.vision import model, vis_processors, extract_features
+from similarity_webservice.model import Images
 import os
 import torch
 from PIL import Image
@@ -14,10 +10,6 @@ import base64
 
 def test_extract_features(app):
     device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
-    (
-        model,
-        vis_processors,
-    ) = load_model_and_vis_preprocess()  # вывести в отдельную функцию/файл
     # Test extract_features function
     raw_image_path = os.path.join(os.path.dirname(__file__), "dum_similarity_img.png")
     raw_image = Image.open(raw_image_path).convert("RGB")
