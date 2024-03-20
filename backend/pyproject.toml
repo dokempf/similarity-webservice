@@ -18,7 +18,7 @@ readme = "README.md"
 maintainers = [
     { name = "Dominic Kempf", email = "ssc@iwr.uni-heidelberg.de" },
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.8, <3.12"
 license = { text = "MIT" }
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -32,6 +32,9 @@ dependencies = [
     "flask-cors",
     "flask-sqlalchemy",
     "requests",
+    "Pillow",
+    "torch",
+    "salesforce-lavis",
 ]
 
 [project.optional-dependencies]

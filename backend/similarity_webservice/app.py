@@ -8,14 +8,27 @@ from similarity_webservice.model import (
     update_collection_content,
     update_collection_name,
     images_as_csv,
+    load_model_and_vis_preprocess,
 )
-from similarity_webservice.vision import finetune_model, similarity_search
+from similarity_webservice.vision import (
+    finetune_model,
+    record_progress,
+    similarity_search,
+)
 
+import base64
 import flask
 import flask_cors
 import logging
 import os
 import sqlalchemy
+import threading
+
+
+# Load the model and the visual preprocessors exactly once this is important for
+# * Fast response time on the first query
+# * Avoiding memory overflows in the test suite
+model, vis_processors = load_model_and_vis_preprocess()
 
 
 def create_app():
@@ -90,7 +103,7 @@ def create_app():
             return flask.send_file(
                 images_as_csv(id),
                 as_attachment=True,
-                download_name=f"{collection_info(id).name}.csv",
+                download_name=f"{collection_info(id)['name']}.csv",
                 mimetype="text/csv",
             )
         except sqlalchemy.exc.NoResultFound:
@@ -104,8 +117,7 @@ def create_app():
     @app.route("/api/collection/<id>/info", methods=["GET"])
     def route_info_collection(id):
         try:
-            coll = collection_info(id)
-            return flask.jsonify(coll)
+            return flask.jsonify(**collection_info(id))
         except sqlalchemy.exc.NoResultFound:
             return (
                 flask.jsonify(
@@ -151,7 +163,18 @@ def create_app():
     @require_api_key
     def route_finetune_collection(id):
         try:
-            finetune_model(id)
+            record_progress(id, 0)
+
+            def _threaded_finetune_model(ctx, id, model, vis_processors):
+                ctx.push()
+                finetune_model(id, model, vis_processors)
+
+            thread = threading.Thread(
+                target=_threaded_finetune_model,
+                args=(app.app_context(), id, model, vis_processors),
+            )
+            thread.daemon = True
+            thread.start()
             return flask.jsonify(
                 message="Model finetuning started", message_type="push"
             )
@@ -163,20 +186,26 @@ def create_app():
                 400,
             )
 
-    @app.route("/api/search", methods=["GET"])
-    def route_search():
+    @app.route("/api/collection/<id>/search", methods=["POST"])
+    def route_search(id):
         # Extract the image from the request
-        if "image" not in flask.request.files:
-            return flask.jsonify(message="Image is missing", message_type="error"), 400
-        image = flask.request.files["image"]
+        try:
+            if b"," in flask.request.data:
+                image = base64.b64decode(
+                    flask.request.data.decode("utf-8").split(",")[1]
+                )
+            else:
+                image = base64.b64decode(flask.request.data)
 
-        # Extract relevant data from the request
-        data = flask.request.json
-        if "id" not in data:
-            return flask.jsonify(message="ID is missing", message_type="error"), 400
-        id = flask.request.json["id"]
+            return flask.jsonify(similarity_search(id, [image], model, vis_processors))
 
-        return flask.jsonify(similarity_search(id, image))
+        except sqlalchemy.exc.NoResultFound:
+            return (
+                flask.jsonify(
+                    message=f"Collection with id={id} not found", message_type="error"
+                ),
+                400,
+            )
 
     with app.app_context():
         db.create_all()

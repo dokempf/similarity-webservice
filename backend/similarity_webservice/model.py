@@ -11,8 +11,22 @@ import flask_sqlalchemy
 import functools
 import io
 
+import torch
+from lavis.models import load_model_and_preprocess
+
 ph = argon2.PasswordHasher()
 db = flask_sqlalchemy.SQLAlchemy()
+
+
+def load_model_and_vis_preprocess():
+    device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
+    model, vis_processors, _ = load_model_and_preprocess(
+        name="blip2_feature_extractor",
+        model_type="coco",
+        is_eval=True,
+    )
+    model.to(device)
+    return model, vis_processors
 
 
 @dataclasses.dataclass
@@ -22,6 +36,7 @@ class Images(db.Model):
     id: int = db.Column(db.Integer, primary_key=True)
     collection: int = db.Column(db.Integer)
     content: list = db.Column(db.JSON, nullable=False)
+    parquet_data: bytes = db.Column(db.LargeBinary, nullable=True)
 
 
 def images_as_csv(id: int):
@@ -50,6 +65,7 @@ class Collection(db.Model):
     name: str = db.Column(db.Text, nullable=False)
     last_modified: datetime = db.Column(db.DateTime, nullable=False)
     last_finetuned: datetime = db.Column(db.DateTime)
+    finetuning_progess: float = db.Column(db.Integer, nullable=True, default=None)
     heidicon_tag: str = db.Column(db.Text, nullable=True)
 
 
@@ -84,6 +100,10 @@ def delete_collection(id: int):
 
     coll = Collection.query.where(Collection.id == id).one()
     db.session.delete(coll)
+
+    images = Images.query.where(Images.collection == id).one()
+    db.session.delete(images)
+
     db.session.commit()
 
 
@@ -127,7 +147,29 @@ def list_collections():
 def collection_info(id):
     """Get information about a collection."""
 
-    return Collection.query.filter_by(id=id).one()
+    # Get the data from the Collection and Images table
+    coll = Collection.query.where(Collection.id == id).one()
+    images = Images.query.where(Images.collection == id).one()
+
+    # Convert to a dictionary and remove the SQLAlchemy state
+    info = coll.__dict__
+    info.pop("_sa_instance_state")
+
+    # Add some derived information
+    info["number_of_images"] = len(images.content)
+    if coll.last_modified is not None and coll.last_finetuned is not None:
+        info["requires_finetuning"] = coll.last_modified > coll.last_finetuned
+    else:
+        info["requires_finetuning"] = coll.last_modified is not None
+    return info
+
+
+def record_progress(id: str, progress: int = 0):
+    """Record the progress of a finetuning operation."""
+
+    coll = Collection.query.where(Collection.id == id).one()
+    coll.finetuning_progess = progress
+    db.session.commit()
 
 
 @dataclasses.dataclass

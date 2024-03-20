@@ -1,3 +1,7 @@
+import os
+import base64
+
+
 def test_verify(client, apikey):
     res = client.post("/api/verify", headers={"API-Key": apikey})
     assert res.status_code == 200
@@ -112,12 +116,41 @@ def test_csvfile_download_invalid_id(client):
     assert res.status_code == 400
 
 
-# Currently not yet implemented
-# def test_finetune_collection(client, apikey):
-#     res = client.post("/api/collection/1/finetune", headers={"API-Key": apikey})
+def test_finetune_collection(client, apikey):
+    res = client.post(
+        "/api/collection/1/finetune",
+        headers={"API-Key": apikey},
+        data="https://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs, https://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs\nhttps://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs, https://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs",
+    )
+    assert res.status_code == 200
 
 
-# Currently not yet implemented
-# def test_search(client):
-#     res = client.get("/api/search")
-#     assert res.status_code == 200
+def test_finetune_collection_invalid_id(client, apikey):
+    res = client.post(
+        "/api/collection/112/finetune",
+        headers={"API-Key": apikey},
+        data="https://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs, https://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs\nhttps://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs, https://www.ssc.uni-heidelberg.de/sites/default/files/styles/img_free_aspect_1540/public/2021-06/dummyuser.png?itok=yL_ne0Qs",
+    )
+    assert res.status_code == 400
+
+
+def test_similarity_search(client):
+    image_path = os.path.join(os.path.dirname(__file__), "dum_similarity_img.png")
+    with open(image_path, "rb") as img_file:
+        image_data = img_file.read()
+
+    # Encode the image data as base64
+    encoded_image = base64.b64encode(image_data)
+    res = client.post("/api/collection/1/search", data=encoded_image)
+    assert res.status_code == 200
+
+
+def test_similarity_search_invalid_id(client):
+    image_path = os.path.join(os.path.dirname(__file__), "dum_similarity_img.png")
+    with open(image_path, "rb") as img_file:
+        image_data = img_file.read()
+
+    # Encode the image data as base64
+    encoded_image = base64.b64encode(image_data)
+    res = client.post("/api/collection/112/search", data=encoded_image)
+    assert res.status_code == 400

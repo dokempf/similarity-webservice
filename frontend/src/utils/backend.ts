@@ -4,17 +4,21 @@ export async function getCollections (): Promise<object> {
   const collections = await get('/collection/list', {})
   const collectionOptions = []
   for (const c of collections.ids) {
-    collectionOptions.push({ id: c, name: 'Collection ' + c })
+    collectionOptions.push({ value: c, id: c, name: 'Collection ' + c })
   }
   return collectionOptions
+}
+
+export async function similaritySearch (collectionId: string, query: string): Promise<object> {
+  return await postFile('/collection/' + collectionId + '/search', '', query, 'base64')
 }
 
 export async function getCollection (collectionId: string): Promise<object> {
   return await get('/collection/' + collectionId + '/info', {})
 }
 
-export async function finetuneModel (collectionId: string): Promise<void> {
-  console.log('Finetuning model for collection ' + collectionId)
+export async function finetuneModel (collectionId: string, key: string): Promise<void> {
+  await post('/collection/' + collectionId + '/finetune', key, {})
 }
 
 export async function createDataset (collectionName: string, heidiconTag: string, key: string): Promise<object> {
