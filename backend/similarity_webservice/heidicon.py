@@ -72,23 +72,20 @@ def extract_heidicon_content(heidicon_tag: str):
 
         # Iterate through the objects that we found
         for resource in objects["objects"]:
-            # Determine the URL of the object that this belongs to
-            print(resource)
-            object_id = resource["lk_object_id"]["_system_object_id"]
-            object_url = f"{easydb_url}/#detail/{object_id}"
-
-            # Iterate through the given assets (typically one)
-            for asset in resource["asset"]:
-                # We list full and huge as resolutions here, as these two are sufficiently
-                # high-res for our purposes + they are already converted to PNG (in contrast to 'original')
+            for asset in resource["ressourcen"]["asset"]:
                 for version in ["full", "huge"]:
-                    # Some resolutions are blocked in EasyDB (unless you have permissions)
                     version_info = asset["versions"][version]
-                    if version_info.get("_not_allowed", False):
+                    if version_info.get("_not_allowed", False) or not version_info.get(
+                        "_download_allowed", True
+                    ):
                         continue
 
-                    # Use this resolution and skip the other available ones
-                    content.append(version_info["download_url"], object_url)
+                    content.append(
+                        (
+                            version_info["download_url"],
+                            f"{easydb_url}/#/detail/{resource['_system_object_id']}",
+                        )
+                    )
                     break
 
         # Set up the next batch. If the current batch was smaller than 1000,
