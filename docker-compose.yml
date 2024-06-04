@@ -5,6 +5,7 @@ services:
       - ${SIMILARITY_WEBSERVICE_DATA:-./docker_volume}:/data
     environment:
       - SQLALCHEMY_DATABASE_URI=sqlite:////data/similarity.db
+      - XDG_CACHE_HOME=/data/cache
 
   frontend:
     build: ./frontend
