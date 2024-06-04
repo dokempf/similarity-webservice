@@ -42,9 +42,10 @@ def extract_features(images: list, model):
     return features_image_stacked
 
 
-def finetune_model(id: str, model, vis_processors):
+def finetune_model(id: str):
     """Finetune a model with a given collection."""
 
+    global model, vis_processors
     device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
     row_with_data = Images.query.filter(Images.collection == id).one()
     coll = Collection.query.filter(Collection.id == id).one()
@@ -84,11 +85,10 @@ def finetune_model(id: str, model, vis_processors):
         db.session.commit()
 
 
-def similarity_search(
-    id: str, images: list, model, vis_processors, num_limit=5, precision_thr=0.0
-):
+def similarity_search(id: str, images: list, num_limit=5, precision_thr=0.0):
     """Search for similar images in a given collection."""
 
+    global model, vis_processors
     device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
     preprocessed_image = [
         vis_processors["eval"](Image.open(io.BytesIO(img)).convert("RGB"))
