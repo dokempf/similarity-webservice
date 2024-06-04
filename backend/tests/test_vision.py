@@ -1,4 +1,4 @@
-from similarity_webservice.vision import model, vis_processors, extract_features
+from similarity_webservice.vision import extract_features
 from similarity_webservice.model import Images
 import os
 import torch
@@ -9,6 +9,8 @@ import base64
 
 
 def test_extract_features(app):
+    from similarity_webservice.vision import model, vis_processors
+
     device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
     # Test extract_features function
     raw_image_path = os.path.join(os.path.dirname(__file__), "dum_similarity_img.png")
