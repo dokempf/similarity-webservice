@@ -8,9 +8,11 @@ from similarity_webservice.model import (
     update_collection_content,
     update_collection_name,
     images_as_csv,
-    load_model_and_vis_preprocess,
 )
 from similarity_webservice.vision import (
+    model,
+    vis_processors,
+    load_model_and_vis_preprocess,
     finetune_model,
     record_progress,
     similarity_search,
@@ -23,12 +25,6 @@ import logging
 import os
 import sqlalchemy
 import threading
-
-
-# Load the model and the visual preprocessors exactly once this is important for
-# * Fast response time on the first query
-# * Avoiding memory overflows in the test suite
-model, vis_processors = load_model_and_vis_preprocess()
 
 
 def create_app():
@@ -48,6 +44,9 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
         "SQLALCHEMY_DATABASE_URI", "sqlite:///similarity_webservice.db"
     )
+
+    # Lazily load the model and vis_processors
+    load_model_and_vis_preprocess()
 
     # Enable CORS for all routes
     flask_cors.CORS(app)
@@ -165,13 +164,13 @@ def create_app():
         try:
             record_progress(id, 0)
 
-            def _threaded_finetune_model(ctx, id, model, vis_processors):
+            def _threaded_finetune_model(ctx, id):
                 ctx.push()
-                finetune_model(id, model, vis_processors)
+                finetune_model(id)
 
             thread = threading.Thread(
                 target=_threaded_finetune_model,
-                args=(app.app_context(), id, model, vis_processors),
+                args=(app.app_context(), id),
             )
             thread.daemon = True
             thread.start()
@@ -197,7 +196,7 @@ def create_app():
             else:
                 image = base64.b64decode(flask.request.data)
 
-            return flask.jsonify(similarity_search(id, [image], model, vis_processors))
+            return flask.jsonify(similarity_search(id, [image]))
 
         except sqlalchemy.exc.NoResultFound:
             return (

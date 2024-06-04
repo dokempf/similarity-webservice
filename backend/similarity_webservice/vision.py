@@ -4,8 +4,26 @@ from PIL import Image
 from similarity_webservice.model import db, Images, Collection, record_progress
 import urllib.request
 import pandas as pd
-import numpy as np
 import io
+from lavis.models import load_model_and_preprocess
+
+
+# Storage for the singleton model and vis_processors
+model = None
+vis_processors = None
+
+
+def load_model_and_vis_preprocess():
+    global model, vis_processors
+
+    if model is None:
+        device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
+        model, vis_processors, _ = load_model_and_preprocess(
+            name="blip2_feature_extractor",
+            model_type="coco",
+            is_eval=True,
+        )
+        model.to(device)
 
 
 def extract_features(images: list, model):
@@ -24,9 +42,10 @@ def extract_features(images: list, model):
     return features_image_stacked
 
 
-def finetune_model(id: str, model, vis_processors):
+def finetune_model(id: str):
     """Finetune a model with a given collection."""
 
+    global model, vis_processors
     device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
     row_with_data = Images.query.filter(Images.collection == id).one()
     coll = Collection.query.filter(Collection.id == id).one()
@@ -66,11 +85,10 @@ def finetune_model(id: str, model, vis_processors):
         db.session.commit()
 
 
-def similarity_search(
-    id: str, images: list, model, vis_processors, num_limit=5, precision_thr=0.0
-):
+def similarity_search(id: str, images: list, num_limit=5, precision_thr=0.0):
     """Search for similar images in a given collection."""
 
+    global model, vis_processors
     device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
     preprocessed_image = [
         vis_processors["eval"](Image.open(io.BytesIO(img)).convert("RGB"))

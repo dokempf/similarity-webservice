@@ -11,22 +11,9 @@ import flask_sqlalchemy
 import functools
 import io
 
-import torch
-from lavis.models import load_model_and_preprocess
 
 ph = argon2.PasswordHasher()
 db = flask_sqlalchemy.SQLAlchemy()
-
-
-def load_model_and_vis_preprocess():
-    device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
-    model, vis_processors, _ = load_model_and_preprocess(
-        name="blip2_feature_extractor",
-        model_type="coco",
-        is_eval=True,
-    )
-    model.to(device)
-    return model, vis_processors
 
 
 @dataclasses.dataclass
@@ -72,6 +59,11 @@ class Collection(db.Model):
 def add_collection(name: str, heidicon_tag: Optional[str] = None):
     """Add a new collection to the database."""
 
+    # If a HeidICON tag was given, extract the content from HeidICON
+    content = []
+    if heidicon_tag is not None:
+        content = extract_heidicon_content(heidicon_tag)
+
     # Create the collection in the Collection table
     coll = Collection(
         name=name,
@@ -81,11 +73,6 @@ def add_collection(name: str, heidicon_tag: Optional[str] = None):
     )
     db.session.add(coll)
     db.session.commit()
-
-    # If a HeidICON tag was given, extract the content from HeidICON
-    content = []
-    if heidicon_tag is not None:
-        content = extract_heidicon_content(heidicon_tag)
 
     # Add a corresponding entry in the Images table
     images = Images(collection=coll.id, content=content)

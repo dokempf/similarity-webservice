@@ -7,4 +7,4 @@ RUN pip install gunicorn
 COPY . .
 
 RUN pip install .
-CMD ["gunicorn", "--bind", "backend:8080", "similarity_webservice:create_app()"]
+CMD ["gunicorn", "--timeout", "360", "--bind", "backend:8080", "similarity_webservice:create_app()"]
