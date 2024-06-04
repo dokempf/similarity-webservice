@@ -74,6 +74,9 @@ def extract_heidicon_content(heidicon_tag: str):
         for resource in objects["objects"]:
             for asset in resource["ressourcen"]["asset"]:
                 for version in ["full", "huge"]:
+                    if version not in asset["versions"]:
+                        continue
+
                     version_info = asset["versions"][version]
                     if version_info.get("_not_allowed", False) or not version_info.get(
                         "_download_allowed", True

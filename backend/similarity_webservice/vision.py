@@ -15,6 +15,7 @@ vis_processors = None
 
 def load_model_and_vis_preprocess():
     global model, vis_processors
+
     if model is None:
         device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
         model, vis_processors, _ = load_model_and_preprocess(

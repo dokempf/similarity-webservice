@@ -164,13 +164,13 @@ def create_app():
         try:
             record_progress(id, 0)
 
-            def _threaded_finetune_model(ctx, id, model, vis_processors):
+            def _threaded_finetune_model(ctx, id):
                 ctx.push()
-                finetune_model(id, model, vis_processors)
+                finetune_model(id)
 
             thread = threading.Thread(
                 target=_threaded_finetune_model,
-                args=(app.app_context(), id, model, vis_processors),
+                args=(app.app_context(), id),
             )
             thread.daemon = True
             thread.start()
@@ -196,7 +196,7 @@ def create_app():
             else:
                 image = base64.b64decode(flask.request.data)
 
-            return flask.jsonify(similarity_search(id, [image], model, vis_processors))
+            return flask.jsonify(similarity_search(id, [image]))
 
         except sqlalchemy.exc.NoResultFound:
             return (
