@@ -94,7 +94,16 @@ def create_app():
 
     @app.route("/api/collection/list", methods=["GET"])
     def route_list_collections():
-        return flask.jsonify({"ids": [coll.id for coll in list_collections()]})
+        coll_list = list_collections()
+        return flask.jsonify(
+            {
+                "ids": [coll.id for coll in coll_list],
+                "names": [
+                    {"value": coll.id, "id": coll.id, "name": coll.name}
+                    for coll in coll_list
+                ],
+            }
+        )
 
     @app.route("/api/collection/<id>/csvfile", methods=["GET"])
     def route_csvfile_collections(id):

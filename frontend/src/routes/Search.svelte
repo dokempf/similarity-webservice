@@ -52,11 +52,11 @@
       {#await getCollections()}
       Loading datasets...
       {:then options}
-          {#if options.length === 0}
+          {#if options.names.length === 0}
             <p>No collections available</p>
           {:else}
             Dataset selection
-            <Select class="mt-2 w-80 p-4" items={options} bind:value={collection_selection} />
+            <Select class="mt-2 w-80 p-4" items={options.names} bind:value={collection_selection} />
           {/if}
       {/await}
     </Label>
