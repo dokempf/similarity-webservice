@@ -40,7 +40,7 @@
   }
 
   // The state of the search site
-  let collection_selection = 0;
+  let collection_selection = 1;
   let query = [];
   let ongoing_query = false;
   let result_images = [];
