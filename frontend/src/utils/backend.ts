@@ -1,12 +1,7 @@
 import { get, post, postFile } from './requests'
 
 export async function getCollections (): Promise<object> {
-  const collections = await get('/collection/list', {})
-  const collectionOptions = []
-  for (const c of collections.ids) {
-    collectionOptions.push({ value: c, id: c, name: 'Collection ' + c })
-  }
-  return collectionOptions
+  return await get('/collection/list', {})
 }
 
 export async function similaritySearch (collectionId: string, query: string): Promise<object> {

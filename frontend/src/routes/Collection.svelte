@@ -85,8 +85,8 @@
       {#key reload}
         {#await getCollections()}
           <p>Loading datasets...</p>
-        {:then collections}
-          {#each collections as { id } }
+        {:then collections }
+          {#each collections.ids as id }
             {#await getCollection(id)}
               <div class="p-4 bg-white rounded-lg shadow-md mb-4">
                 Loading dataset details...
