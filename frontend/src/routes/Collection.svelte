@@ -66,8 +66,22 @@
 </script>
 
 <div class="w-full h-full pt-8">
-  <P>Explanatory Text...</P>
+  <P class="text-gray-600 mb-3">
+    This interface is only relevant if you are looking to add additional imaging data to this instance of
+    the similarity search webservice. In order to do any operation, you need to provide a valid API key.
+    If you do not have one, please get in touch with the system administrator of this instance.
+  </P>
+  <P class="text-gray-600 mb-3">
+    Image collection can be entered in two ways: The default way is to upload a CSV file that consists of one row
+    per image and two columns: The first column must contain a URL to the image, the second column must
+    contain a URL (e.g. in a data repository) that should be linked to in the search results.
+  </P>
+  <P class="text-gray-600 mb-3">
+    Alternatively, you may also directly link to data that is already managed on <a href="https://heidicon.ub.uni-heidelberg.de/">HeidICON</a>.
+    In this case, you need to provide the name of a tag that is applied to the relevant data on HeidICON.
+  </P>
   <div class="pt-4">
+    <h1 class="text-2xl m-2">Authentication</h1>
     <Label color={apikey_verified ? "green" :  "red"}>API Key:</Label>
     <Input color={apikey_verified ? "green" :  "red"} on:blur={verifyAPIKeyTrigger} type={apikey_visible ? "text" : "password"} class="w-full" id="apikey" bind:value={apikey}>
       <button type="button" slot="right" on:click={() => (apikey_visible = !apikey_visible)} tabindex=-1>
@@ -80,7 +94,7 @@
     </Input>
   </div>
   <div class="pt-4">
-    <Label>Existing Data Sources:</Label>
+    <h1 class="text-2xl m-2">Existing Data Sources</h1>
     <div class="h-full bg-slate-50">
       {#key reload}
         {#await getCollections()}
@@ -179,16 +193,18 @@
     </div>
   </div>
   <div class="w-full pt-4">
-    Add new (empty) data source:
+    <h1 class="text-2xl m-2">
+      Adding new (empty) data source
+    </h1>
     <Label>Dataset name:</Label>
-    <Input type="text" class="w-full" bind:value={createname} id="datasetname" required />
-    <Toggle bind:checked={heidicon}>This dataset is managed on HeidICON</Toggle>
+    <Input type="text" class="w-full m-2" bind:value={createname} id="datasetname" required />
+    <Toggle bind:checked={heidicon} class="m-2">This dataset is managed on HeidICON</Toggle>
     {#if heidicon}
       <Label>
         The images in HeidIcon are tagged with the following tag:
-        <Input type="text" class="w-full" bind:value={heidicon_tag} id="heidicon_tag" />
+        <Input type="text" class="w-full m-2" bind:value={heidicon_tag} id="heidicon_tag" />
       </Label>
     {/if}
-    <Button class="w-full" color="blue" on:click={createDatasetTrigger}>Add data source</Button>
+    <Button class="w-full m-2" color="blue" on:click={createDatasetTrigger}>Add data source</Button>
   </div>
 </div>
