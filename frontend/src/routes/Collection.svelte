@@ -113,17 +113,17 @@
                   <div>
                     <!-- The buttons shown for each dataset -->
                     {#if details.heidicon_tag === null }
-                      <Button color="blue" on:click={() => (upload_modal[id] = true)}><FileCsvOutline /><UploadOutline />Upload Data</Button>
+                      <Button class="m-2" color="blue" on:click={() => (upload_modal[id] = true)}><FileCsvOutline /><UploadOutline />Upload Data</Button>
                     {/if}
                     {#if details.heidicon_tag !== null}
-                      <Button color="blue" on:click={() => (updateHeidicon(id, apikey))}><DatabaseOutline /><FileImportOutline />Synchronize with HeidIcon</Button>
+                      <Button class="m-2" color="blue" on:click={() => (updateHeidicon(id, apikey))}><DatabaseOutline /><FileImportOutline />Synchronize with HeidIcon</Button>
                     {/if}
                     <form action="{import.meta.env.VITE_BACKEND_BASE_URL}/collection/{id}/csvfile" class="inline">
-                      <Button color="blue" type="submit"><FileCsvOutline /><DownloadOutline />Download Data</Button>
+                      <Button class="m-2" color="blue" type="submit"><FileCsvOutline /><DownloadOutline />Download Data</Button>
                     </form>
-                    <Button color="blue" on:click={() => (delete_modal[id] = true)}><TrashBinOutline />Delete Dataset</Button>
-                    <Button color="blue" on:click={() => (editname_modal[id] = true)}><EditOutline />Edit Name</Button>
-                    <Button color="blue" on:click={() => (finetune_modal[id] = true)}><MagicWandOutline />Finetune Model</Button>
+                    <Button class="m-2" color="blue" on:click={() => (delete_modal[id] = true)}><TrashBinOutline />Delete Dataset</Button>
+                    <Button class="m-2" color="blue" on:click={() => (editname_modal[id] = true)}><EditOutline />Edit Name</Button>
+                    <Button class="m-2" color="blue" on:click={() => (finetune_modal[id] = true)}><MagicWandOutline />Finetune Model</Button>
 
                     <!-- Additional modal logic attached to above buttons -->
                     <Modal title="Upload CSV file" bind:open={upload_modal[id]} outsideclose autoclose>
