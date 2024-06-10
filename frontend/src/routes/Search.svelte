@@ -46,8 +46,8 @@
   let result_images = [];
 </script>
 
-<div class="h-full w-full grid grid-cols-2 gap-8 pt-8">
-  <div class="pl-20 pr-20">
+<div class="flex flex-col md:flex-row w-full mt-8">
+  <div class="md:flex-shrink-0 md:w-1/4 w-full min-w-[300px] m-4">
     <Label>
       {#await getCollections()}
       Loading datasets...
@@ -56,11 +56,11 @@
             <p>No collections available</p>
           {:else}
             Dataset selection
-            <Select class="mt-2 w-80 p-4" items={options.names} bind:value={collection_selection} />
+            <Select class="mt-2 w-full p-4" items={options.names} bind:value={collection_selection} />
           {/if}
       {/await}
     </Label>
-    <Button class="w-80 p-4" color="blue" disabled="{ongoing_query}" on:click={similaritySearchCall}>
+    <Button class="mt-4 w-full" color="blue" disabled="{ongoing_query}" on:click={similaritySearchCall}>
       Start Search {#if ongoing_query} <Spinner size="4" color="white"/> {/if}
     </Button>
     <!-- https://flowbite-svelte.com/docs/forms/file-input -->
@@ -69,15 +69,15 @@
       on:change={handleChange}
       on:drop={dropHandle}
       on:dragover={(event) => { event.preventDefault(); }}
-      class="w-80"
+      class="w-full mt-4"
       >
       <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
       <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG or GIF</p>
     </Dropzone>
-    <Gallery items={query} class="gap-4 p- w-80" />
+    <Gallery items={query} class="mt-4 w-full" />
   </div>
-  <div>
-    Similarity Search Results:
-    <LinkedGallery class="h-full bg-slate-50 gap-4 grid-cols-3" items={result_images} />
+  <div class="md:flex-grow m-4 w-full min-w-[500px]">
+    <Label>Similarity Search Results</Label>
+    <LinkedGallery class="h-full gap-4 grid-cols-3 mt-2 rounded-lg" items={result_images} />
   </div>
 </div>
