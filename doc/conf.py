@@ -19,6 +19,9 @@ author = "Dominic Kempf"
 extensions = [
     "nbsphinx",
     "nbsphinx_link",
+    "sphinxcontrib.httpdomain",
+    "sphinxcontrib.autohttp.flask",
+    "sphinxcontrib.autohttp.flaskqref",
     "sphinx_mdinclude",
     "sphinx.ext.autodoc",
     "sphinx_rtd_theme",

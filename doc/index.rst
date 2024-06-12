@@ -6,7 +6,6 @@ similarity_webservice
    :caption: Contents:
 
    intro
-   demo
    api
 
 Indices and tables

@@ -1,9 +1,7 @@
-User API
+REST API
 ========
 
-.. toctree::
-
-This is an example function:
-
-.. automodule:: similarity_webservice
-    :members:
+.. autoflask:: similarity_webservice.app:create_app()
+   :endpoints:
+   :undoc-static:
+   :order: path

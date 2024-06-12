@@ -49,6 +49,7 @@ docs = [
     "sphinx",
     "sphinx_mdinclude",
     "sphinx_rtd_theme",
+    "sphinxcontrib-httpdomain",
 ]
 
 # Command line scripts installed as part of the installation
