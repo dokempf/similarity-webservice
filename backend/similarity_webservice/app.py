@@ -25,7 +25,7 @@ import sqlalchemy
 import threading
 
 
-def create_app():
+def create_app(instantiate_model=True):
     """Create the Flask app for similarity search webservice.
 
     This is wrapped into a function in order to allow modifications to
@@ -44,7 +44,8 @@ def create_app():
     )
 
     # Lazily load the model and vis_processors
-    load_model_and_vis_preprocess()
+    if instantiate_model:
+        load_model_and_vis_preprocess()
 
     # Enable CORS for all routes
     flask_cors.CORS(app)
