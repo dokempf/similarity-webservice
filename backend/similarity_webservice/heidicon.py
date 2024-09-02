@@ -73,7 +73,7 @@ def extract_heidicon_content(heidicon_tag: str):
         # Iterate through the objects that we found
         for resource in objects["objects"]:
             for asset in resource["ressourcen"]["asset"]:
-                for version in ["full", "huge"]:
+                for version in ["full", "huge", "small"]:
                     if version not in asset["versions"]:
                         continue
 
@@ -81,6 +81,10 @@ def extract_heidicon_content(heidicon_tag: str):
                     if version_info.get("_not_allowed", False) or not version_info.get(
                         "_download_allowed", True
                     ):
+                        continue
+
+                    # Some assets are "failed" or "pending". We cannot use them.
+                    if version_info["status"] != "done":
                         continue
 
                     content.append(
@@ -93,6 +97,6 @@ def extract_heidicon_content(heidicon_tag: str):
 
         # Set up the next batch. If the current batch was smaller than 1000,
         # we are done and can break out of the loop
-        offset += len(objects)
+        offset += len(objects["objects"])
 
     return content
