@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Dropzone, Gallery, Label, Select, Spinner } from "flowbite-svelte";
+  import { Button, Dropzone, Gallery, Label, P, Select, Spinner } from "flowbite-svelte";
   import { getCollections, similaritySearch } from "../utils/backend";
   import LinkedGallery from "../components/LinkedGallery.svelte";
 
@@ -30,6 +30,7 @@
 
   async function similaritySearchCall() {
     ongoing_query = true;
+    result_images = [];
     const result = await similaritySearch(collection_selection, query[0].src);
     let update = []
     for(const img of result) {
@@ -78,6 +79,14 @@
   </div>
   <div class="md:flex-grow m-4 w-full min-w-[500px]">
     <Label>Similarity Search Results</Label>
-    <LinkedGallery class="h-full gap-4 grid-cols-3 mt-2 rounded-lg" items={result_images} />
+    {#if ongoing_query}
+      <div class="easydb-waiting flex justify-center">
+        <P class="pt-24">
+          <Spinner class="h-48 w-48"/>
+        </P>
+      </div>
+    {:else}
+      <LinkedGallery class="h-full gap-4 grid-cols-3 mt-2 rounded-lg" items={result_images} />
+    {/if}
   </div>
 </div>
