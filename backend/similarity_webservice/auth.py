@@ -5,7 +5,6 @@ import os
 import secrets
 import sqlalchemy
 
-from similarity_webservice.app import create_app
 from similarity_webservice.model import db, add_new_apikey, list_apikeys, delete_apikey
 
 

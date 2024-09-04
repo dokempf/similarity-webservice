@@ -8,6 +8,7 @@ from similarity_webservice.model import (
     update_collection_content,
     update_collection_name,
     images_as_csv,
+    startup_sanity_check,
 )
 from similarity_webservice.vision import (
     load_model_and_vis_preprocess,
@@ -312,5 +313,6 @@ def create_app(instantiate_model=True):
 
     with app.app_context():
         db.create_all()
+        startup_sanity_check()
 
     return app

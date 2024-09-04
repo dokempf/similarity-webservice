@@ -220,3 +220,16 @@ def delete_apikey(id: int) -> None:
     key = ApiKey.query.where(ApiKey.id == id).one()
     db.session.delete(key)
     db.session.commit()
+
+
+def startup_sanity_check() -> None:
+    """Perform a sanity check at startup
+
+    Called after start-up to remove any remnants that might have
+    occured from a crashed previous run.
+    """
+
+    for coll in Collection.query.all():
+        if coll.finetuning_progess is not None:
+            coll.finetuning_progess = None
+            db.session.commit()
