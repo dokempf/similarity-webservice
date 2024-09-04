@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Alert, Navbar, NavBrand, NavHamburger, NavUl, NavLi } from "flowbite-svelte";
+  import { Navbar, NavBrand, NavHamburger, NavUl, NavLi } from "flowbite-svelte";
   import { GithubSolid, InfoCircleSolid } from "flowbite-svelte-icons";
   import { alerts } from "./utils/alerts";
 
@@ -9,6 +9,7 @@
   import Collection from "./routes/Collection.svelte";
   import Search from "./routes/Search.svelte";
   import NotFound from "./routes/Notfound.svelte";
+  import TimedAlert from "./components/TimedAlert.svelte";
 
   export const routes = {
     "/": Search,
@@ -39,10 +40,10 @@
   </Navbar>
 
   {#each $alerts as alert}
-    <Alert color={alert.color} dismissable class="m-2">
+    <TimedAlert color={alert.color} dismissable class="m-2">
       <InfoCircleSolid slot="icon" class="w-4 h-4" />
       {alert.msg}
-    </Alert>
+    </TimedAlert>
   {/each}
 </header>
 
