@@ -62,6 +62,7 @@
 
   async function verifyAPIKeyTrigger() {
     const response = await verifyAPIKey(apikey)
+    apikey_verified = response.message === "API key is valid";
   }
 </script>
 
