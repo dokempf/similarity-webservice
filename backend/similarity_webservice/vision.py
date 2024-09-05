@@ -60,18 +60,23 @@ def finetune_model(id: str):
             parquet_feature_tensor = torch.tensor(parquet_df.values).to(device)
 
         for i, content in enumerate(content_list):
-            raw_image = Image.open(urllib.request.urlopen(content[0])).convert("RGB")
-            preprocessed_image = [
-                vis_processors["eval"](raw_image).unsqueeze(0).to(device)
-            ]
+            try:
+                raw_image = Image.open(urllib.request.urlopen(content[0])).convert(
+                    "RGB"
+                )
+                preprocessed_image = [
+                    vis_processors["eval"](raw_image).unsqueeze(0).to(device)
+                ]
 
-            features_image_stacked = extract_features(preprocessed_image, model)
-            # Concatenate extracted features
-            parquet_feature_tensor = torch.cat(
-                [parquet_feature_tensor, features_image_stacked]
-            )
+                features_image_stacked = extract_features(preprocessed_image, model)
+                # Concatenate extracted features
+                parquet_feature_tensor = torch.cat(
+                    [parquet_feature_tensor, features_image_stacked]
+                )
 
-            record_progress(id, int((i + 1) / len(content_list) * 100))
+                record_progress(id, int((i + 1) / len(content_list) * 100))
+            except urllib.error.URLError:
+                print(f"Could not download image {content[0]}")
 
         all_feature_df = pd.DataFrame(parquet_feature_tensor.cpu().numpy())
         parquet_file = io.BytesIO()
