@@ -50,6 +50,7 @@ def finetune_model(id: str):
     row_with_data = Images.query.filter(Images.collection == id).one()
     coll = Collection.query.filter(Collection.id == id).one()
     content_list = row_with_data.content
+    actual_content = []
 
     if row_with_data.parquet_data is None or (coll.last_modified > coll.last_finetuned):
         if row_with_data.parquet_data is None:
@@ -74,6 +75,7 @@ def finetune_model(id: str):
                     [parquet_feature_tensor, features_image_stacked]
                 )
 
+                actual_content.append(content)
                 record_progress(id, int((i + 1) / len(content_list) * 100))
             except urllib.error.URLError:
                 print(f"Could not download image {content[0]}")
@@ -84,6 +86,7 @@ def finetune_model(id: str):
         parquet_file.seek(0)
 
         row_with_data.parquet_data = parquet_file.read()
+        row_with_data.content = actual_content
 
         coll.finetuning_progess = None
         coll.last_finetuned = datetime.now(timezone.utc)
