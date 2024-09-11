@@ -53,6 +53,8 @@ def finetune_model(id: str):
     actual_content = []
 
     if row_with_data.parquet_data is None or (coll.last_modified > coll.last_finetuned):
+        record_progress(id, 0)
+
         if row_with_data.parquet_data is None:
             parquet_df = pd.DataFrame()
             parquet_feature_tensor = torch.empty(0).to(device)

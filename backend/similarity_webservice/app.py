@@ -258,7 +258,6 @@ def create_app(instantiate_model=True):
         :status 200: The model finetuning was started successfully.
         """
         try:
-            record_progress(id, 0)
 
             def _threaded_finetune_model(ctx, id):
                 ctx.push()
