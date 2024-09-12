@@ -300,7 +300,15 @@ def create_app(instantiate_model=True):
             else:
                 image = base64.b64decode(flask.request.data)
 
-            return flask.jsonify(similarity_search(id, [image]))
+            data = flask.request.args
+            return flask.jsonify(
+                similarity_search(
+                    id,
+                    [image],
+                    int(data.get("num_results", 5)),
+                    float(data.get("threshold", 0.0)) / 100,
+                )
+            )
 
         except sqlalchemy.exc.NoResultFound:
             return (

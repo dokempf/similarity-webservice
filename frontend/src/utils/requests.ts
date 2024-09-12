@@ -50,10 +50,10 @@ export async function post (route: string, key: string, body: object = {}): Prom
   }
 }
 
-export async function postFile (route: string, key: string, file: File, mimetype: string): Promise<object> {
+export async function postFile (route: string, key: string, file: File, mimetype: string, query: object): Promise<object> {
   try {
     const response: object = await fetch(
-      apiURL + route,
+      apiURL + route + "?" + new URLSearchParams(query).toString(),
       {
         method: 'POST',
         headers: {

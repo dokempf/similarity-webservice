@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Dropzone, Gallery, Label, P, Select, Spinner } from "flowbite-svelte";
+  import { Button, Dropzone, Gallery, Label, P, Range, Select, Spinner } from "flowbite-svelte";
   import { getCollections, similaritySearch } from "../utils/backend";
   import ResultGallery from "../components/ResultGallery.svelte";
 
@@ -30,15 +30,17 @@
 
   async function similaritySearchCall() {
     ongoing_query = true;
-    result_images = await similaritySearch(collection_selection, query[0].src);
+    result_images = await similaritySearch(collection_selection, query[0].src, number_of_results, similarity_threshold);
     ongoing_query = false;
   }
 
   // The state of the search site
   let collection_selection = 1;
+  let number_of_results = 5;
   let query = [];
   let ongoing_query = false;
   let result_images = [];
+  let similarity_threshold = 50;
 </script>
 
 <div class="flex flex-col md:flex-row w-full mt-8">
@@ -54,6 +56,13 @@
             <Select class="mt-2 w-full p-4" items={options.names} bind:value={collection_selection} />
           {/if}
       {/await}
+    </Label>
+    <Label class="pt-2">
+      Number of results to show:
+      <Select class="mt-2 p-4" items={[{"value": 5, "name": "5"}, {"value": 10, "name": "10"}, {"value": 20, "name": "20"}, {"value": 50, "name": "50"}, {"value": 100, "name": "100"}]} bind:value={number_of_results} />
+    </Label>
+    <Label class="pt-2">Similarity Threshold: {similarity_threshold}%
+      <Range class="mt-2" min="0" max="100" step="0.01" bind:value={similarity_threshold} />
     </Label>
     <Button class="mt-4 w-full" color="blue" disabled="{ongoing_query}" on:click={similaritySearchCall}>
       Start Search {#if ongoing_query} <Spinner size="4" color="white"/> {/if}

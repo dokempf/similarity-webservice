@@ -4,8 +4,8 @@ export async function getCollections (): Promise<object> {
   return await get('/collection/list', {})
 }
 
-export async function similaritySearch (collectionId: string, query: string): Promise<object> {
-  return await postFile('/collection/' + collectionId + '/search', '', query, 'base64')
+export async function similaritySearch (collectionId: string, query: string, num_results: number, threshold: number): Promise<object> {
+  return await postFile('/collection/' + collectionId + '/search', '', query, 'base64', { num_results: num_results, threshold: threshold })
 }
 
 export async function getCollection (collectionId: string): Promise<object> {
