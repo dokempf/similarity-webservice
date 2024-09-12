@@ -15,9 +15,10 @@
   {#each items as item}
     <slot {item}>
       <div>
-        <a href={item.href} target="_blank">
-          <img src={item.src} alt={item.alt} class={twMerge(imgClass, $$props.classImg)} />
+        <a href={item.repo_url} target="_blank">
+          <img src={item.image_url} alt="Image Link Broken" class={twMerge(imgClass, $$props.classImg)} />
         </a>
+        Similarity Score: {(item.score * 100).toFixed(2)}%
       </div>
     </slot>
   {:else}

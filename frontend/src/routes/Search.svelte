@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button, Dropzone, Gallery, Label, P, Select, Spinner } from "flowbite-svelte";
   import { getCollections, similaritySearch } from "../utils/backend";
-  import LinkedGallery from "../components/LinkedGallery.svelte";
+  import ResultGallery from "../components/ResultGallery.svelte";
 
   function handleChange(event) {
     query = [];
@@ -30,13 +30,7 @@
 
   async function similaritySearchCall() {
     ongoing_query = true;
-    result_images = [];
-    const result = await similaritySearch(collection_selection, query[0].src);
-    let update = []
-    for(const img of result) {
-      update.push({ src: img.image_url, href: img.repo_url });
-    }
-    result_images = update
+    result_images = await similaritySearch(collection_selection, query[0].src);
     ongoing_query = false;
   }
 
@@ -86,7 +80,7 @@
         </P>
       </div>
     {:else}
-      <LinkedGallery class="h-full gap-4 grid-cols-3 mt-2 rounded-lg" items={result_images} />
+      <ResultGallery class="h-full gap-4 grid-cols-3 mt-2 rounded-lg" items={result_images} />
     {/if}
   </div>
 </div>
