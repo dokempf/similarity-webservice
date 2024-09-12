@@ -2,6 +2,7 @@
   import { Button, Dropzone, Gallery, Label, P, Range, Select, Spinner } from "flowbite-svelte";
   import { getCollections, similaritySearch } from "../utils/backend";
   import ResultGallery from "../components/ResultGallery.svelte";
+  import CollectionSelector from "../components/CollectionSelector.svelte";
 
   function handleChange(event) {
     query = [];
@@ -35,7 +36,7 @@
   }
 
   // The state of the search site
-  let collection_selection = 1;
+  let collection_selection;
   let number_of_results = 5;
   let query = [];
   let ongoing_query = false;
@@ -45,18 +46,13 @@
 
 <div class="flex flex-col md:flex-row w-full mt-8">
   <div class="md:flex-shrink-0 md:w-1/4 w-full min-w-[300px] m-4">
-    <Label>
-      {#await getCollections()}
-      Loading datasets...
-      {:then options}
-          {#if options.names.length === 0}
-            <p>No collections available</p>
-          {:else}
-            Dataset selection
-            <Select class="mt-2 w-full p-4" items={options.names} bind:value={collection_selection} />
-          {/if}
-      {/await}
-    </Label>
+    {#await getCollections()}
+      <Label>
+        Loading datasets...
+      </Label>
+    {:then options}
+      <CollectionSelector data={options} bind:collection_selection={collection_selection}/>
+    {/await}
     <Label class="pt-2">
       Number of results to show:
       <Select class="mt-2 p-4" items={[{"value": 5, "name": "5"}, {"value": 10, "name": "10"}, {"value": 20, "name": "20"}, {"value": 50, "name": "50"}, {"value": 100, "name": "100"}]} bind:value={number_of_results} />
