@@ -9,11 +9,11 @@ from similarity_webservice.model import (
     update_collection_name,
     images_as_csv,
     startup_sanity_check,
+    ensure_collection_id,
 )
 from similarity_webservice.vision import (
     load_model_and_vis_preprocess,
     finetune_model,
-    record_progress,
     similarity_search,
 )
 
@@ -258,6 +258,7 @@ def create_app(instantiate_model=True):
         :status 200: The model finetuning was started successfully.
         """
         try:
+            ensure_collection_id(id)
 
             def _threaded_finetune_model(ctx, id):
                 ctx.push()

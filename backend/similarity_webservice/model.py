@@ -233,3 +233,7 @@ def startup_sanity_check() -> None:
         if coll.finetuning_progess is not None:
             coll.finetuning_progess = None
             db.session.commit()
+
+
+def ensure_collection_id(id: int) -> None:
+    Collection.query.where(Collection.id == id).one()
