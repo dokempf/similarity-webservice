@@ -131,10 +131,10 @@ def similarity_search(id: str, images: list, num_limit=5, precision_thr=0.0):
         ]
 
     similar_image_indices = torch.nonzero(
-        similarity_scores >= precision_thr, as_tuple=False
-    ).squeeze()
+        similarity_scores >= precision_thr, as_tuple=True
+    )
     sorted_indices = sorted(
-        similar_image_indices.tolist(), key=lambda x: similarity_scores[x], reverse=True
+        similar_image_indices[0], key=lambda x: similarity_scores[x], reverse=True
     )
 
     # Get the IDs of the most similar images
