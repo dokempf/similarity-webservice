@@ -39,7 +39,8 @@ export async function post (route: string, key: string, body: object = {}): Prom
           'API-Key': key,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(30000)
       }
     )
     const json = await response.json()
@@ -60,7 +61,8 @@ export async function postFile (route: string, key: string, file: File, mimetype
           'API-Key': key,
           'Content-Type': mimetype
         },
-        body: file
+        body: file,
+        signal: AbortSignal.timeout(30000)
       }
     )
     const json = await response.json()
