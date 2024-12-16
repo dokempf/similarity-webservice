@@ -35,6 +35,7 @@ dependencies = [
     "Pillow",
     "torch",
     "salesforce-lavis",
+    "numpy<2",
 ]
 
 [project.optional-dependencies]
